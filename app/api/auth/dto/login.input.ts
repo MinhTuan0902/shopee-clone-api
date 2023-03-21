@@ -8,3 +8,17 @@ export class LoginInput {
   @Field(() => String)
   password: string;
 }
+
+export class CreateLoginOTPInput {
+  @Field(() => String)
+  phoneNumber: string;
+}
+
+@InputType()
+export class LoginWithOTPInput {
+  @Field(() => String)
+  phoneNumber: string;
+
+  @Field(() => String)
+  otp: string;
+}

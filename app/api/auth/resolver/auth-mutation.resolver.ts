@@ -15,10 +15,17 @@ import { generateNumberOTP } from 'lib/util/otp';
 import { comparePassword } from 'lib/util/password';
 import { now } from 'lib/util/time';
 import { Connection, Model } from 'mongoose';
-import { CreateRegisterRequest, LoginInput, RegisterInput } from '../dto';
+import {
+  CreateLoginOTPInput,
+  CreateRegisterRequest,
+  LoginInput,
+  LoginWithOTPInput,
+  RegisterInput,
+} from '../dto';
 import {
   DisableUserError,
   MaxDeviceLoginExceedError,
+  NotRegisteredPhoneNumberError,
   OTPHasBeenSentBeforeError,
   RegisteredPhoneNumberError,
   WrongOTPError,
@@ -92,6 +99,7 @@ export class AuthMutationResolver {
         userId: newUser.id,
         ...authData.refreshToken,
       });
+      this.customRedisService.del(key);
 
       return authData;
     } catch (error) {
@@ -119,7 +127,6 @@ export class AuthMutationResolver {
       throw new DisableUserError();
     }
 
-    // TODO: store ShopeeSetting to Redis
     const shopeeSetting = await this.shopeeSettingModel.findOne();
     const currentLoginDeviceCount = await this.refreshTokenModel.count({
       userId: user.id,
@@ -141,5 +148,71 @@ export class AuthMutationResolver {
     return authData;
   }
 
-  // TODO: login with OTP, login QR
+  @Mutation(() => Boolean)
+  async createLoginOTP(
+    @Args('input') { phoneNumber }: CreateLoginOTPInput,
+  ): Promise<boolean> {
+    if (!(await this.userModel.findOne({ deletedAt: null, phoneNumber }))) {
+      throw new NotRegisteredPhoneNumberError();
+    }
+
+    const key = `otp:${phoneNumber}`;
+    const otp = generateNumberOTP();
+    const otpTTL = this.envService.get(ENVVariable.OTPTimeToLive);
+    this.customRedisService.set({
+      key,
+      value: otp,
+      ttl: otpTTL,
+    });
+    this.smsSenderService.addSMSSenderPayloadToQueue({
+      toPhoneNumber: phoneNumber,
+      body: `Your verification code is ${otp}`,
+    });
+
+    return true;
+  }
+
+  @Mutation(() => AuthData)
+  async loginWithOTP(
+    @Args('input') input: LoginWithOTPInput,
+  ): Promise<AuthData> {
+    const { phoneNumber, otp } = input;
+    const user = await this.userModel.findOne({ deletedAt: null, phoneNumber });
+    if (!user) {
+      throw new WrongUsernameError();
+    }
+
+    if (user.status === UserStatus.Disabled) {
+      throw new DisableUserError();
+    }
+
+    const key = `otp:${phoneNumber}`;
+    const otpInRedis = await this.customRedisService.get(key);
+    if (!otpInRedis || otpInRedis !== otp) {
+      throw new WrongOTPError();
+    }
+
+    const shopeeSetting = await this.shopeeSettingModel.findOne();
+    const currentLoginDeviceCount = await this.refreshTokenModel.count({
+      userId: user.id,
+      revokedAt: null,
+      expiresAt: {
+        $gt: now('millisecond'),
+      },
+    });
+    if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLoginAllowed) {
+      throw new MaxDeviceLoginExceedError();
+    }
+
+    const authData = await this.authService.createAuthData(user);
+    this.refreshTokenModel.create({
+      userId: user.id,
+      ...authData.refreshToken,
+    });
+    this.customRedisService.del(key);
+
+    return authData;
+  }
+
+  // TODO: QR login
 }
