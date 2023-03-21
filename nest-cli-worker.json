@@ -1,0 +1,8 @@
+{
+    "collection": "@nestjs/schematics",
+    "sourceRoot": "app/worker",
+    "entryFile": "worker",
+    "compilerOptions": {
+      "webpack": true
+    }
+  }
