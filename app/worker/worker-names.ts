@@ -1,3 +1,3 @@
-export const QueueName = {
-  SMSSender: 'sms:sender',
-};
+export enum QueueName {
+  SMSSender = 'sms:sender',
+}

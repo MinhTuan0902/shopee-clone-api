@@ -16,6 +16,12 @@ export class RegisteredPhoneNumberError extends Error {
   }
 }
 
+export class NotRegisteredPhoneNumberError extends Error {
+  constructor() {
+    super();
+  }
+}
+
 export class DisableUserError extends Error {
   constructor() {
     super();
