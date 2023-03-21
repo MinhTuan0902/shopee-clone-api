@@ -13,7 +13,7 @@ export function millisecondToSecond(millisecond: number): number {
  * @param {TimeUnit} timeUnit Time unit
  * @returns Returns current time based on time unit input
  */
-export function now(timeUnit: TimeUnit = 'millisecond'): number {
+export function now(timeUnit: TimeUnit): number {
   switch (timeUnit) {
     case 'second':
       return new Date().getTime() / 1000;
