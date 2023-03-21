@@ -61,7 +61,7 @@ export class AuthMutationResolver {
     const otp = generateNumberOTP();
     const otpTTL = this.envService.get(ENVVariable.OTPTimeToLive);
     this.customRedisService.set({
-      key: `otp:${phoneNumber}`,
+      key,
       value: otp,
       ttl: otpTTL,
     });
