@@ -5,7 +5,6 @@ export enum NodeENV {
 
 export enum ENVVariable {
   APIServerPort = 'API_SERVER_PORT',
-  Stage = 'STAGE',
   NodeENV = 'NODE_ENV',
   MongoURIDevelop = 'MONGO_URI_DEVELOP',
   MongoURIProduction = 'MONGO_URI_PRODUCTION',
