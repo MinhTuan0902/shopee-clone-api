@@ -6,16 +6,12 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 import { join } from 'path';
 import { ENVVariable, NodeENV } from '../env/env.constant';
-import { ENVModule } from '../env/env.module';
 import { ENVService } from '../env/env.service';
 
 @Global()
 @Module({
   imports: [
-    ENVModule,
-
     MongooseModule.forRootAsync({
-      imports: [ENVModule],
       inject: [ENVService],
       useFactory: (envService: ENVService): MongooseModuleOptions => {
         const nodeENV = envService.get(ENVVariable.NodeENV);
@@ -47,7 +43,6 @@ import { ENVService } from '../env/env.service';
     }),
 
     JwtModule.registerAsync({
-      imports: [ENVModule],
       inject: [ENVService],
       useFactory: (envService: ENVService): JwtModuleOptions => {
         return {
