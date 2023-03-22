@@ -1,10 +1,7 @@
 import { CustomRedisService } from '@common/module/custom-redis/customer-redis.service';
 import { ENVVariable } from '@common/module/env/env.constant';
 import { ENVService } from '@common/module/env/env.service';
-import {
-  RefreshToken,
-  RefreshTokenDocument,
-} from '@entity/refresh-token/refresh-token.entity';
+import { RefreshToken, RefreshTokenDocument } from '@entity/refresh-token';
 import { ShopeeSetting, ShopeeSettingDocument } from '@entity/setting';
 import { User, UserDocument } from '@entity/user';
 import { UserStatus } from '@entity/user/enum';
