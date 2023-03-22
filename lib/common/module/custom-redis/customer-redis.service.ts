@@ -15,7 +15,7 @@ interface IRedisSetInput {
 export class CustomRedisService {
   private redis: Redis;
   constructor(private readonly redisService: RedisService) {
-    this.redis = redisService.getClient();
+    this.redis = this.redisService.getClient();
   }
 
   async set({ key, value, ttl }: IRedisSetInput) {

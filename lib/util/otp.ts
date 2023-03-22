@@ -1,5 +1,10 @@
 import { isInt } from 'class-validator';
 
+/**
+ *
+ * @param {number} length Length of OTP
+ * @returns Returns a number OTP
+ */
 export function generateNumberOTP(length: number = 6): string {
   if (!isInt(length) || length < 0) {
     return '';
