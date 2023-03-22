@@ -1,11 +1,21 @@
-export class OTPHasBeenSentBeforeError extends Error {
+import { GraphQLBadRequestError } from '@common/error';
+
+export class OTPHasBeenSentBeforeError extends GraphQLBadRequestError {
   constructor() {
-    super();
+    super({
+      messageCode: 'OTP_HAS_BEEN_SENT',
+      message: 'OTP has been sent before',
+    });
+    this.name = 'BeenSentBeforeError';
   }
 }
 
-export class WrongOTPError extends Error {
+export class WrongOTPError extends GraphQLBadRequestError {
   constructor() {
-    super();
+    super({
+      messageCode: 'WRONG_OTP',
+      message: 'OTP is wrong',
+    });
+    this.name = 'WrongOTPError';
   }
 }

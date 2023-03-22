@@ -9,7 +9,6 @@ import { SMSSenderService } from './sms.sender.service';
 
 @Module({
   imports: [
-    ENVModule,
     TwilioModule.forRootAsync({
       imports: [ENVModule],
       inject: [ENVService],
@@ -25,6 +24,6 @@ import { SMSSenderService } from './sms.sender.service';
     }),
   ],
   providers: [SMSSenderService],
-  exports: [SMSSenderService],
+  exports: [SMSSenderService, TwilioModule],
 })
 export class SMSSenderModule {}

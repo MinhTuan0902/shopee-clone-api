@@ -2,6 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { RedisService } from '@liaoliaots/nestjs-redis';
 import { Redis } from 'ioredis';
 
+interface IRedisSetInput {
+  key: string;
+  value: string;
+  /**
+   * Time to live in second
+   */
+  ttl?: number;
+}
+
 @Injectable()
 export class CustomRedisService {
   private redis: Redis;
@@ -9,11 +18,7 @@ export class CustomRedisService {
     this.redis = redisService.getClient();
   }
 
-  /**
-   *
-   * @param {object} ttl Time to live in second
-   */
-  async set({ key, value, ttl }) {
+  async set({ key, value, ttl }: IRedisSetInput) {
     this.redis.set(key, value, 'EX', ttl);
   }
 

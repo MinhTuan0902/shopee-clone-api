@@ -12,7 +12,7 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { SMSSenderService } from '@worker/sms-sender/sms.sender.service';
 import { generateNumberOTP } from 'lib/util/otp';
-import { comparePassword } from 'lib/util/password';
+import { comparePassword, encryptPassword } from 'lib/util/password';
 import { now } from 'lib/util/time';
 import { Connection, Model } from 'mongoose';
 import {
@@ -82,7 +82,7 @@ export class AuthMutationResolver {
 
   @Mutation(() => AuthData)
   async register(@Args('input') input: RegisterInput): Promise<AuthData> {
-    const { phoneNumber, otp } = input;
+    const { phoneNumber, otp, password } = input;
     const key = `otp:${phoneNumber}`;
     const otpInRedis = await this.customRedisService.get(key);
     if (!otpInRedis || otpInRedis !== otp) {
@@ -93,7 +93,10 @@ export class AuthMutationResolver {
     session.startTransaction();
 
     try {
-      const newUser = await this.userModel.create({ ...input });
+      const newUser = await this.userModel.create({
+        ...input,
+        password: await encryptPassword(password),
+      });
       const authData = await this.authService.createAuthData(newUser);
       this.refreshTokenModel.create({
         userId: newUser.id,
@@ -103,6 +106,7 @@ export class AuthMutationResolver {
 
       return authData;
     } catch (error) {
+      console.log(error);
     } finally {
       session.endSession();
     }

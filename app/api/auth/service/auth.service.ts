@@ -31,8 +31,9 @@ export class AuthService {
     });
     return {
       token,
-      expiresAt:
+      expiresAt: new Date(
         now('millisecond') + secondToMillisecond(accessTokenExpirationTime),
+      ),
     };
   }
 
@@ -45,8 +46,9 @@ export class AuthService {
     });
     return {
       token,
-      expiresAt:
+      expiresAt: new Date(
         now('millisecond') + secondToMillisecond(refreshTokenExpirationTime),
+      ),
     };
   }
 

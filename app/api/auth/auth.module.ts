@@ -9,7 +9,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SMSSenderModule } from '@worker/sms-sender/sms-sender.module';
-import { AuthMutationResolver } from './resolver';
+import { AuthMutationResolver, AuthQueryResolver } from './resolver';
 import { AuthService } from './service';
 
 @Module({
@@ -39,6 +39,7 @@ import { AuthService } from './service';
   providers: [
     // Resolvers
     AuthMutationResolver,
+    AuthQueryResolver,
 
     // Services
     AuthService,

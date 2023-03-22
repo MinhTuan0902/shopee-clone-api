@@ -1,4 +1,4 @@
-import { CoreModule } from '@common/module/core/core.module';
+import { ENVModule } from '@common/module/env/env.module';
 import { BullModule } from '@nestjs/bull/dist/bull.module';
 import { Module } from '@nestjs/common';
 import { SMSSenderConsumer } from './sms-sender/sms-sender.consumer';
@@ -7,7 +7,7 @@ import { QueueName } from './worker-names';
 
 @Module({
   imports: [
-    CoreModule,
+    ENVModule,
     BullModule.registerQueue({
       name: QueueName.SMSSender,
     }),

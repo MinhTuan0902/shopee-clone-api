@@ -6,5 +6,5 @@ export class JWT {
   token: string;
 
   @Field(() => Date)
-  expiresAt: number;
+  expiresAt: Date;
 }
