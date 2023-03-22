@@ -11,8 +11,8 @@ async function bootstrap() {
   const envService = app.get(ENVService);
   const PORT = envService.get(ENVVariable.APIServerPort);
 
-  Logger.log(`API server is running on port ${PORT}`);
-
   await app.listen(PORT);
+
+  Logger.log(`API server is running on port ${PORT}`);
 }
 bootstrap();

@@ -9,6 +9,7 @@ export class LoginInput {
   password: string;
 }
 
+@InputType()
 export class CreateLoginOTPInput {
   @Field(() => String)
   phoneNumber: string;
