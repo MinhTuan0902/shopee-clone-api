@@ -9,8 +9,10 @@ import { Module } from '@nestjs/common';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SMSSenderModule } from '@worker/sms-sender/sms-sender.module';
+import { JWTGuard } from './guard';
 import { AuthMutationResolver, AuthQueryResolver } from './resolver';
 import { AuthService } from './service';
+import { JWTStrategy } from './strategy';
 
 @Module({
   imports: [
@@ -43,6 +45,12 @@ import { AuthService } from './service';
 
     // Services
     AuthService,
+
+    // Strategies
+    JWTStrategy,
+
+    // Guards
+    JWTGuard,
   ],
 })
 export class AuthModule {}

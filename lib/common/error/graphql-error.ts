@@ -20,7 +20,7 @@ export class GraphQLBadRequestError extends GraphQLError {
 
 export class GraphQLUnauthorizedError extends GraphQLError {
   constructor() {
-    super('Unauthorized request', {
+    super('Unauthorized', {
       extensions: {
         status: HttpStatus.UNAUTHORIZED,
         code: 'UNAUTHORIZED',

@@ -59,3 +59,13 @@ export class MaxDeviceLoginExceedError extends GraphQLBadRequestError {
     this.name = 'MaxDeviceLoginExceedError';
   }
 }
+
+export class ExpiredTokenError extends GraphQLBadRequestError {
+  constructor() {
+    super({
+      messageCode: 'EXPIRED_TOKEN',
+      message: 'Token is expired',
+    });
+    this.name = 'ExpiredTokenError';
+  }
+}

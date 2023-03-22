@@ -1,7 +1,10 @@
-import { Field, ID } from '@nestjs/graphql';
+import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Prop } from '@nestjs/mongoose';
 
+@ObjectType()
 export class BaseEntity {
+  _id: string;
+
   @Field(() => ID)
   id: string;
 
