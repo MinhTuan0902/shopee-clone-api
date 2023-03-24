@@ -1,3 +1,4 @@
+import { GraphQLBadRequestError } from '@common/error';
 import { CustomRedisService } from '@common/module/custom-redis/customer-redis.service';
 import { ENVVariable } from '@common/module/env/env.constant';
 import { ENVService } from '@common/module/env/env.service';
@@ -5,6 +6,7 @@ import { RefreshToken, RefreshTokenDocument } from '@entity/refresh-token';
 import { ShopeeSetting, ShopeeSettingDocument } from '@entity/setting';
 import { User, UserDocument } from '@entity/user';
 import { UserStatus } from '@entity/user/enum';
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { SMSSenderService } from '@worker/sms-sender/sms.sender.service';
@@ -12,12 +14,16 @@ import { generateNumberOTP } from 'lib/util/otp';
 import { comparePassword, encryptPassword } from 'lib/util/password';
 import { now } from 'lib/util/time';
 import { Connection, Model } from 'mongoose';
+import { CurrentUser } from '../decorator';
 import {
+  ChangePasswordInput,
   CreateLoginOTPInput,
   CreateRegisterRequest,
+  CreateResetPasswordRequestInput,
   LoginInput,
   LoginWithOTPInput,
   RegisterInput,
+  ResetPasswordInput,
 } from '../dto';
 import {
   DisableUserError,
@@ -29,8 +35,9 @@ import {
   WrongPasswordError,
   WrongUsernameError,
 } from '../error';
+import { JWTGuard } from '../guard';
 import { AuthService } from '../service';
-import { AuthData } from '../type';
+import { AuthData, JWTData } from '../type';
 
 @Resolver()
 export class AuthMutationResolver {
@@ -57,7 +64,7 @@ export class AuthMutationResolver {
       throw new RegisteredPhoneNumberError();
     }
 
-    const key = `otp:${phoneNumber}`;
+    const key = `otp:register:${phoneNumber}`;
     if (await this.customRedisService.get(key)) {
       throw new OTPHasBeenSentBeforeError();
     }
@@ -71,7 +78,7 @@ export class AuthMutationResolver {
     });
     this.smsSenderService.addSMSSenderPayloadToQueue({
       toPhoneNumber: phoneNumber,
-      body: `Your verification code is ${otp}`,
+      body: `Your OTP to register is ${otp}`,
     });
 
     return true;
@@ -80,7 +87,7 @@ export class AuthMutationResolver {
   @Mutation(() => AuthData)
   async register(@Args('input') input: RegisterInput): Promise<AuthData> {
     const { phoneNumber, otp, password } = input;
-    const key = `otp:${phoneNumber}`;
+    const key = `otp:register:${phoneNumber}`;
     const otpInRedis = await this.customRedisService.get(key);
     if (!otpInRedis || otpInRedis !== otp) {
       throw new WrongOTPError();
@@ -103,7 +110,10 @@ export class AuthMutationResolver {
 
       return authData;
     } catch (error) {
-      console.log(error);
+      throw new GraphQLBadRequestError({
+        messageCode: 'UNCAUGHT_ERROR',
+        message: error?.message,
+      });
     } finally {
       session.endSession();
     }
@@ -111,16 +121,20 @@ export class AuthMutationResolver {
 
   @Mutation(() => AuthData)
   async login(@Args('input') input: LoginInput): Promise<AuthData> {
-    const { emailOrPhoneNumber, password } = input;
+    const { emailOrPhoneNumberOrUsername, password } = input;
     const user = await this.userModel.findOne({
       deletedAt: null,
-      $or: [{ email: emailOrPhoneNumber }, { phoneNumber: emailOrPhoneNumber }],
+      $or: [
+        { email: emailOrPhoneNumberOrUsername },
+        { phoneNumber: emailOrPhoneNumberOrUsername },
+        { username: emailOrPhoneNumberOrUsername },
+      ],
     });
     if (!user) {
       throw new WrongUsernameError();
     }
 
-    if (!comparePassword(password, user.password)) {
+    if (!(await comparePassword(password, user.password))) {
       throw new WrongPasswordError();
     }
 
@@ -153,11 +167,16 @@ export class AuthMutationResolver {
   async createLoginOTP(
     @Args('input') { phoneNumber }: CreateLoginOTPInput,
   ): Promise<boolean> {
-    if (!(await this.userModel.findOne({ deletedAt: null, phoneNumber }))) {
+    const user = await this.userModel.findOne({ deletedAt: null, phoneNumber });
+    if (!user) {
       throw new NotRegisteredPhoneNumberError();
     }
 
-    const key = `otp:${phoneNumber}`;
+    if (user.status === UserStatus.Disabled) {
+      throw new DisableUserError();
+    }
+
+    const key = `otp:login:${phoneNumber}`;
     const otp = generateNumberOTP();
     const otpTTL = this.envService.get(ENVVariable.OTPTimeToLive);
     this.customRedisService.set({
@@ -167,7 +186,7 @@ export class AuthMutationResolver {
     });
     this.smsSenderService.addSMSSenderPayloadToQueue({
       toPhoneNumber: phoneNumber,
-      body: `Your verification code is ${otp}`,
+      body: `Your OTP to login is ${otp}`,
     });
 
     return true;
@@ -187,7 +206,7 @@ export class AuthMutationResolver {
       throw new DisableUserError();
     }
 
-    const key = `otp:${phoneNumber}`;
+    const key = `otp:login:${phoneNumber}`;
     const otpInRedis = await this.customRedisService.get(key);
     if (!otpInRedis || otpInRedis !== otp) {
       throw new WrongOTPError();
@@ -215,5 +234,92 @@ export class AuthMutationResolver {
     return authData;
   }
 
-  // TODO: QR login
+  @Mutation(() => Boolean)
+  async createResetPasswordRequest(
+    @Args('input') { phoneNumber }: CreateResetPasswordRequestInput,
+  ): Promise<boolean> {
+    const user = await this.userModel.findOne({ deletedAt: null, phoneNumber });
+    if (!user) {
+      throw new NotRegisteredPhoneNumberError();
+    }
+
+    if (user.status === UserStatus.Disabled) {
+      throw new DisableUserError();
+    }
+
+    const key = `otp:reset-password:${phoneNumber}`;
+    if (await this.customRedisService.get(key)) {
+      throw new OTPHasBeenSentBeforeError();
+    }
+    const otp = generateNumberOTP();
+    const otpTTL = this.envService.get(ENVVariable.OTPTimeToLive);
+    this.customRedisService.set({ key, value: otp, ttl: otpTTL });
+    this.smsSenderService.addSMSSenderPayloadToQueue({
+      toPhoneNumber: phoneNumber,
+      body: `Your OTP to reset password is ${otp}`,
+    });
+
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  async resetPassword(
+    @Args('input') { phoneNumber, otp, newPassword }: ResetPasswordInput,
+  ): Promise<boolean> {
+    const user = await this.userModel.findOne({ deletedAt: null, phoneNumber });
+    if (!user) {
+      throw new NotRegisteredPhoneNumberError();
+    }
+
+    if (user.status === UserStatus.Disabled) {
+      throw new DisableUserError();
+    }
+
+    const key = `otp:reset-password:${phoneNumber}`;
+    const otpInRedis = await this.customRedisService.get(key);
+    if (!otpInRedis || otpInRedis !== otp) {
+      throw new WrongOTPError();
+    }
+    this.customRedisService.del(key);
+
+    await this.userModel.updateOne(
+      {
+        _id: user.id,
+      },
+      {
+        $set: {
+          password: await encryptPassword(newPassword),
+        },
+      },
+    );
+
+    return true;
+  }
+
+  @UseGuards(JWTGuard)
+  @Mutation(() => Boolean)
+  async changePassword(
+    @Args('input') { currentPassword, newPassword }: ChangePasswordInput,
+    @CurrentUser() currentUser: JWTData,
+  ): Promise<boolean> {
+    const user = await this.userModel.findOne({ _id: currentUser.userId });
+    if (!(await comparePassword(currentPassword, user.password))) {
+      throw new WrongPasswordError();
+    }
+
+    await this.userModel.updateOne(
+      {
+        _id: currentUser.userId,
+      },
+      {
+        $set: {
+          password: await encryptPassword(newPassword),
+        },
+      },
+    );
+
+    return true;
+  }
+
+  // TODO: QR login, logout all device
 }
