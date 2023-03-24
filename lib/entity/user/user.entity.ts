@@ -26,7 +26,7 @@ export class User extends BaseEntity {
   @Prop({ type: String })
   password: string;
 
-  @Prop({ type: Array<String>, enum: Role, default: [Role.User] })
+  @Prop({ type: Array<string>, enum: Role, default: [Role.User] })
   roles: Role[];
 
   @Prop({ type: String, enum: ActualRole })

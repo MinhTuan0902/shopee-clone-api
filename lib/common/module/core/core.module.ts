@@ -1,3 +1,4 @@
+import { GraphQLUnauthorizedError } from '@common/error';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -25,7 +26,6 @@ import { ENVService } from '../env/env.service';
       },
       formatError: (
         formattedError: GraphQLFormattedError,
-        error: unknown,
       ): GraphQLFormattedError => {
         delete formattedError.extensions.stacktrace;
         return formattedError;
@@ -34,7 +34,20 @@ import { ENVService } from '../env/env.service';
         'graphql-ws': true,
         'subscriptions-transport-ws': {
           path: '/graphql',
-          onConnect: ({ connectionParams }) => {},
+          onConnect: ({ connectionParams }) => {
+            const authHeader = connectionParams?.authorization;
+            if (!authHeader) {
+              throw new GraphQLUnauthorizedError();
+            }
+
+            return {
+              req: {
+                headers: {
+                  authorization: authHeader,
+                },
+              },
+            };
+          },
         },
       },
     }),

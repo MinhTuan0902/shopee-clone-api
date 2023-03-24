@@ -2,7 +2,7 @@ import { compare, hash } from 'bcrypt';
 
 export async function encryptPassword(
   password: string,
-  saltRounds: number = 10,
+  saltRounds = 10,
 ): Promise<string> {
   return hash(password, saltRounds);
 }
