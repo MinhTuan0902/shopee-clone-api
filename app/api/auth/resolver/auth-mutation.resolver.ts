@@ -350,7 +350,7 @@ export class AuthMutationResolver {
     );
 
     return true;
-  }
 
-  // TODO: QR login, logout all device
+    // TODO: QR login
+  }
 }
