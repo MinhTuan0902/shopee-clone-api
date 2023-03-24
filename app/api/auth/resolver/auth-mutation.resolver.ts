@@ -1,3 +1,4 @@
+import { UserAgent } from '@common/decorator';
 import { GraphQLBadRequestError } from '@common/error';
 import { CustomRedisService } from '@common/module/custom-redis/customer-redis.service';
 import { ENVVariable } from '@common/module/env/env.constant';
@@ -6,13 +7,12 @@ import { RefreshToken, RefreshTokenDocument } from '@entity/refresh-token';
 import { ShopeeSetting, ShopeeSettingDocument } from '@entity/setting';
 import { User, UserDocument } from '@entity/user';
 import { UserStatus } from '@entity/user/enum';
-import { UseGuards } from '@nestjs/common';
+import { Ip, UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { SMSSenderService } from '@worker/sms-sender/sms.sender.service';
 import { generateNumberOTP } from 'lib/util/otp';
 import { comparePassword, encryptPassword } from 'lib/util/password';
-import { now } from 'lib/util/time';
 import { Connection, Model } from 'mongoose';
 import { CurrentUser } from '../decorator';
 import {
@@ -120,7 +120,11 @@ export class AuthMutationResolver {
   }
 
   @Mutation(() => AuthData)
-  async login(@Args('input') input: LoginInput): Promise<AuthData> {
+  async login(
+    @Args('input') input: LoginInput,
+    @UserAgent() userAgent: string,
+    @Ip() ip: string,
+  ): Promise<AuthData> {
     const { emailOrPhoneNumberOrUsername, password } = input;
     const user = await this.userModel.findOne({
       deletedAt: null,
@@ -147,7 +151,7 @@ export class AuthMutationResolver {
       userId: user.id,
       revokedAt: null,
       expiresAt: {
-        $gt: now('millisecond'),
+        $gt: new Date(),
       },
     });
     if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLoginAllowed) {
@@ -158,6 +162,8 @@ export class AuthMutationResolver {
     this.refreshTokenModel.create({
       userId: user.id,
       ...authData.refreshToken,
+      deviceName: userAgent,
+      ipAddress: ip,
     });
 
     return authData;
@@ -195,6 +201,8 @@ export class AuthMutationResolver {
   @Mutation(() => AuthData)
   async loginWithOTP(
     @Args('input') input: LoginWithOTPInput,
+    @UserAgent() userAgent: string,
+    @Ip() ip: string,
   ): Promise<AuthData> {
     const { phoneNumber, otp } = input;
     const user = await this.userModel.findOne({ deletedAt: null, phoneNumber });
@@ -217,7 +225,7 @@ export class AuthMutationResolver {
       userId: user.id,
       revokedAt: null,
       expiresAt: {
-        $gt: now('millisecond'),
+        $gt: new Date(),
       },
     });
     if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLoginAllowed) {
@@ -228,6 +236,8 @@ export class AuthMutationResolver {
     this.refreshTokenModel.create({
       userId: user.id,
       ...authData.refreshToken,
+      deviceName: userAgent,
+      ipAddress: ip,
     });
     this.customRedisService.del(key);
 
@@ -314,6 +324,27 @@ export class AuthMutationResolver {
       {
         $set: {
           password: await encryptPassword(newPassword),
+        },
+      },
+    );
+
+    return true;
+  }
+
+  @UseGuards(JWTGuard)
+  @Mutation(() => Boolean)
+  async logoutAllDevice(@CurrentUser() { userId }: JWTData) {
+    await this.refreshTokenModel.updateMany(
+      {
+        userId,
+        revokedAt: null,
+        expiresAt: {
+          $gt: new Date(),
+        },
+      },
+      {
+        $set: {
+          revokedAt: new Date(),
         },
       },
     );

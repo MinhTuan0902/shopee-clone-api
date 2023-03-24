@@ -15,7 +15,7 @@ import { ENVService } from '../env/env.service';
       driver: ApolloDriver,
       playground: true,
       buildSchemaOptions: {
-        dateScalarMode: 'timestamp',
+        dateScalarMode: 'isoDate',
       },
       autoSchemaFile: {
         path: join(process.cwd(), 'generated/schema.gql'),

@@ -1,8 +1,9 @@
+import { CollectionName } from '@entity/collection-name';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
-@Schema()
+@Schema({ collection: CollectionName.ShopeeSetting })
 @ObjectType()
 export class ShopeeSetting {
   @Prop({ type: Number, default: 3 })

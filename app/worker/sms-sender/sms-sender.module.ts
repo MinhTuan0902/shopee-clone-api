@@ -3,7 +3,7 @@ import { ENVModule } from '@common/module/env/env.module';
 import { ENVService } from '@common/module/env/env.service';
 import { BullModule } from '@nestjs/bull';
 import { Module } from '@nestjs/common';
-import { QueueName } from '@worker/worker-names';
+import { BullRegisterQueuesConfig } from '@worker/worker-names';
 import { TwilioModule, TwilioModuleOptions } from 'nestjs-twilio';
 import { SMSSenderService } from './sms.sender.service';
 
@@ -19,9 +19,7 @@ import { SMSSenderService } from './sms.sender.service';
         };
       },
     }),
-    BullModule.registerQueue({
-      name: QueueName.SMSSender,
-    }),
+    BullModule.registerQueue(BullRegisterQueuesConfig.smsSender),
   ],
   providers: [SMSSenderService],
   exports: [SMSSenderService, TwilioModule],
