@@ -1,10 +1,11 @@
+import { CollectionName } from '@entity/collection-name';
 import { User } from '@entity/user';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongoSchema } from 'mongoose';
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, collection: CollectionName.RefreshToken })
 export class RefreshToken {
-  @Prop({ type: MongoSchema.Types.ObjectId, ref: User.name })
+  @Prop({ type: MongoSchema.Types.ObjectId, index: true })
   userId: string;
 
   @Prop({ type: String })

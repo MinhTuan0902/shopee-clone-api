@@ -54,7 +54,7 @@ export class MaxDeviceLoginExceedError extends GraphQLBadRequestError {
   constructor() {
     super({
       messageCode: 'MAX_LOGGED_DEVICE',
-      message: 'User is logged at many devices',
+      message: 'Account is logged at many devices',
     });
     this.name = 'MaxDeviceLoginExceedError';
   }
