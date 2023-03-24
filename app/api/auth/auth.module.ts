@@ -9,7 +9,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { SMSSenderModule } from '@worker/sms-sender/sms-sender.module';
-import { JWTGuard } from './guard';
+import { ActualRolesGuard, JWTGuard, RolesGuard } from './guard';
 import { AuthMutationResolver, AuthQueryResolver } from './resolver';
 import { AuthService } from './service';
 import { JWTStrategy } from './strategy';
@@ -51,6 +51,8 @@ import { JWTStrategy } from './strategy';
 
     // Guards
     JWTGuard,
+    RolesGuard,
+    ActualRolesGuard,
   ],
 })
 export class AuthModule {}

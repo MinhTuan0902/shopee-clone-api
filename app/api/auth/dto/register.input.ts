@@ -1,4 +1,4 @@
-import { Role } from '@entity/user/enum';
+import { ActualRole, Role } from '@entity/user/enum';
 import { InputType, Field } from '@nestjs/graphql';
 import { ArrayNotContains } from 'class-validator';
 
@@ -24,7 +24,10 @@ export class RegisterInput {
   @Field(() => String)
   otp: string;
 
-  @Field(() => [Role], { defaultValue: [Role.User] })
-  @ArrayNotContains([Role.Admin])
-  roles: Role;
+  // @Field(() => [Role], { defaultValue: [Role.User] })
+  // @ArrayNotContains([Role.Admin])
+  // roles: [Role];
+
+  @Field(() => ActualRole, { defaultValue: ActualRole.Customer })
+  actualRole: ActualRole;
 }

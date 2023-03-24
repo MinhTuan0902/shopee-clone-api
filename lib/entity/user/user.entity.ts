@@ -2,7 +2,7 @@ import { BaseEntity } from '@entity/base.entity';
 import { CollectionName } from '@entity/collection-name';
 import { Field, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Role, UserStatus } from './enum';
+import { ActualRole, Role, UserStatus } from './enum';
 
 @Schema({ timestamps: true, collection: CollectionName.User })
 @ObjectType()
@@ -28,6 +28,10 @@ export class User extends BaseEntity {
 
   @Prop({ type: Array<String>, enum: Role, default: [Role.User] })
   roles: Role[];
+
+  @Prop({ type: String, enum: ActualRole })
+  @Field(() => ActualRole)
+  actualRole: ActualRole;
 
   @Prop({ type: String, enum: UserStatus, default: UserStatus.Active })
   @Field(() => UserStatus)

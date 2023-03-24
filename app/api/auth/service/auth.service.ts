@@ -3,7 +3,7 @@ import { ENVService } from '@common/module/env/env.service';
 import { User } from '@entity/user';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { now, secondToMillisecond } from 'lib/util/time';
+import { now } from 'lib/util/time';
 import { AuthData, JWT, JWTData } from '../type';
 
 @Injectable()
@@ -19,6 +19,7 @@ export class AuthService {
       email: user?.email,
       phoneNumber: user?.phoneNumber,
       roles: user.roles,
+      actualRole: user.actualRole,
     };
   }
 
