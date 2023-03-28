@@ -3,7 +3,7 @@ import { ENVService } from '@common/module/env/env.service';
 import { User } from '@entity/user';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { now } from 'lib/util/time';
+import { now } from '@util/time';
 import { AuthData, JWT, JWTData } from '../type';
 
 @Injectable()

@@ -1,6 +1,7 @@
 export enum NodeENV {
-  Develop = 'DEVELOPMENT',
-  Production = 'PRODUCTION',
+  Development = 'development',
+  Production = 'production',
+  Test = 'test',
 }
 
 export enum ENVVariable {

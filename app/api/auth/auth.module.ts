@@ -20,11 +20,9 @@ import { JWTStrategy } from './strategy';
     CustomRedisModule,
     SMSSenderModule,
 
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
       { name: RefreshToken.name, schema: RefreshTokenSchema },
-    ]),
-    MongooseModule.forFeature([
       { name: ShopeeSetting.name, schema: ShopeeSettingSchema },
     ]),
 

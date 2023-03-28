@@ -23,7 +23,7 @@ class RedisServerError extends Error {
         return {
           config: {
             host: envService.get(ENVVariable.RedisHost),
-            port: envService.get(ENVVariable.RedisPort),
+            port: +envService.get(ENVVariable.RedisPort),
             onClientCreated(client: Redis) {
               client.on('error', () => {
                 throw new RedisServerError();

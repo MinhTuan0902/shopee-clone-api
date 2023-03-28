@@ -22,7 +22,9 @@
       "@worker/*": ["app/worker/*"],
       "@entity/*": ["lib/entity/*"],
       "@interface/*": ["lib/interface/*"],
-      "@common/*": ["lib/common/*"]
-    }
+      "@common/*": ["lib/common/*"],
+      "@util/*": ["lib/util/*"]
+    },
+    "allowJs": true
   }
 }

@@ -6,7 +6,7 @@ import { ENVVariable } from './env.constant';
 export class ENVService {
   constructor(private readonly configService: ConfigService) {}
 
-  get(envVariable: ENVVariable) {
+  get(envVariable: ENVVariable): string {
     return this.configService.get(envVariable);
   }
 }

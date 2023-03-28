@@ -7,14 +7,14 @@ import { RefreshToken, RefreshTokenDocument } from '@entity/refresh-token';
 import { ShopeeSetting, ShopeeSettingDocument } from '@entity/setting';
 import { User, UserDocument } from '@entity/user';
 import { UserStatus } from '@entity/user/enum';
-import { Ip, UseGuards } from '@nestjs/common';
+import { Ip } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { SMSSenderService } from '@worker/sms-sender/sms.sender.service';
 import { generateNumberOTP } from 'lib/util/otp';
 import { comparePassword, encryptPassword } from 'lib/util/password';
 import { Connection, Model } from 'mongoose';
-import { CurrentUser } from '../decorator';
+import { CurrentUser, RequireUser } from '../decorator';
 import {
   ChangePasswordInput,
   CreateLoginOTPInput,
@@ -74,7 +74,7 @@ export class AuthMutationResolver {
     this.customRedisService.set({
       key,
       value: otp,
-      ttl: otpTTL,
+      ttl: +otpTTL,
     });
     this.smsSenderService.addSMSSenderPayloadToQueue({
       toPhoneNumber: phoneNumber,
@@ -188,7 +188,7 @@ export class AuthMutationResolver {
     this.customRedisService.set({
       key,
       value: otp,
-      ttl: otpTTL,
+      ttl: +otpTTL,
     });
     this.smsSenderService.addSMSSenderPayloadToQueue({
       toPhoneNumber: phoneNumber,
@@ -263,7 +263,7 @@ export class AuthMutationResolver {
     }
     const otp = generateNumberOTP();
     const otpTTL = this.envService.get(ENVVariable.OTPTimeToLive);
-    this.customRedisService.set({ key, value: otp, ttl: otpTTL });
+    this.customRedisService.set({ key, value: otp, ttl: +otpTTL });
     this.smsSenderService.addSMSSenderPayloadToQueue({
       toPhoneNumber: phoneNumber,
       body: `Your OTP to reset password is ${otp}`,
@@ -306,7 +306,7 @@ export class AuthMutationResolver {
     return true;
   }
 
-  @UseGuards(JWTGuard)
+  @RequireUser()
   @Mutation(() => Boolean)
   async changePassword(
     @Args('input') { currentPassword, newPassword }: ChangePasswordInput,
@@ -331,7 +331,7 @@ export class AuthMutationResolver {
     return true;
   }
 
-  @UseGuards(JWTGuard)
+  @RequireUser()
   @Mutation(() => Boolean)
   async logoutAllDevice(@CurrentUser() { userId }: JWTData) {
     await this.refreshTokenModel.updateMany(
