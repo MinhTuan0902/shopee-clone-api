@@ -1,7 +1,3 @@
-import { generateNumberOTP } from 'lib/util/otp';
-import { comparePassword, encryptPassword } from 'lib/util/password';
-import { Connection, Model } from 'mongoose';
-
 import { UserAgent } from '@common/decorator/context.decorator';
 import { GraphQLBadRequestError } from '@common/error/graphql.error';
 import { CustomRedisService } from '@common/module/custom-redis/custom-redis.service';
@@ -21,7 +17,9 @@ import { Ip } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { SendSMSService } from '@worker/send-sms/send-sms.service';
-
+import { generateNumberOTP } from 'lib/util/otp';
+import { comparePassword, encryptPassword } from 'lib/util/password';
+import { Connection, Model } from 'mongoose';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorator/current-user.decorator';
 import { RequireUser } from './decorator/require-user.decorator';
@@ -163,7 +161,7 @@ export class AuthMutationResolver {
         $gt: new Date(),
       },
     });
-    if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLoginAllowed) {
+    if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLogin) {
       throw new MaxDeviceLoginExceedError();
     }
 
@@ -237,7 +235,7 @@ export class AuthMutationResolver {
         $gt: new Date(),
       },
     });
-    if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLoginAllowed) {
+    if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLogin) {
       throw new MaxDeviceLoginExceedError();
     }
 
@@ -340,6 +338,8 @@ export class AuthMutationResolver {
     return true;
   }
 
+  // TODO: Logout tất cả thiết bị, ngoại trừ thiết bị đang đăng nhập
+  // TODO: refresh token
   @RequireUser()
   @Mutation(() => Boolean)
   async logoutAllDevice(@CurrentUser() { userId }: JWTData) {

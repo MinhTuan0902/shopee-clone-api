@@ -1,0 +1,17 @@
+{
+  "AUTH": {
+    "WRONG_PASSWORD": "Mật khẩu không chính xác",
+    "WRONG_USERNAME": "Tên đăng nhập không chính xác",
+    "REGISTERED_PHONE_NUMBER": "Số điện thoại này đã được đăng ký tài khoản trước đó",
+    "NOT_REGISTERED_PHONE_NUMBER": "Số điện thoại này chưa được đăng ký với bất kỳ tài khoản nào",
+    "DISABLED_USER": "Tài khoản của bạn đã bị vô hiệu hóa",
+    "MAX_LOGGED_DEVICE": "Tài khoản của bạn đang đăng nhập trên nhiều thiết bị",
+    "EXPIRED_TOKEN": "Phiên đã hết hạn, vui lòng đăng nhập lại"
+  },
+  "PRODUCT": {
+    "NOT_FOUND": "Sản phẩm không tồn tại",
+    "ALREADY_EXISTED": "Sản phẩm đã tồn tại",
+    "THUMBNAIL_MEDIA_NOT_FOUND": "Hình ảnh/video thu nhỏ sản phẩm không tồn tại",
+    "DISPLAY_MEDIAS_NOT_FOUND": "Hình ảnh/video mô tả sản phẩm không tồn tại"
+  }
+}

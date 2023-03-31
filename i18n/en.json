@@ -1,0 +1,17 @@
+{
+  "AUTH": {
+    "WRONG_PASSWORD": "Password is wrong",
+    "WRONG_USERNAME": "Username is wrong",
+    "REGISTERED_PHONE_NUMBER": "Phone number has been registered",
+    "NOT_REGISTERED_PHONE_NUMBER": "Phone number has not been registered",
+    "DISABLED_USER": "User is disabled",
+    "MAX_LOGGED_DEVICE": "Account is logged at many devices",
+    "EXPIRED_TOKEN": "Token is expired"
+  },
+  "PRODUCT": {
+    "NOT_FOUND": "Product is not found",
+    "ALREADY_EXISTED": "Product already existed",
+    "THUMBNAIL_MEDIA_NOT_FOUND": "Thumbnail media is not found",
+    "DISPLAY_MEDIAS_NOT_FOUND": "Display medias are not found"
+  }
+}

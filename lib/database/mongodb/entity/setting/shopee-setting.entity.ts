@@ -7,11 +7,19 @@ import { Document } from 'mongoose';
 export class ShopeeSetting {
   @Prop({ type: Number, default: 5 })
   @Field(() => Int)
-  maxDeviceLoginAllowed: number;
+  maxDeviceLogin: number;
 
   @Prop({ type: Number, default: 5 })
   @Field(() => Int)
   maxDistinctProductOnOrder: number;
+
+  @Prop({ type: Number, default: 2 })
+  @Field(() => Int, { description: 'Max uploaded file size in MB' })
+  maxUploadedFileSize: number;
+
+  @Prop({ type: Number, default: 10 })
+  @Field(() => Int, { description: 'Max uploaded file quantity' })
+  maxUploadedFileQuantity: number;
 }
 
 export type ShopeeSettingDocument = ShopeeSetting & Document;

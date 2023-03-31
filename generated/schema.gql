@@ -1,0 +1,199 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  fullName: String!
+  username: String
+  email: String
+  phoneNumber: String
+  actualRole: ActualRole!
+  status: UserStatus!
+  profileImageId: ID
+  coverImageId: ID
+  followerIds: [ID!]
+  followingIds: [ID!]
+  searchProductHistory: [String!]
+  locale: Locale!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+enum ActualRole {
+  Customer
+  Seller
+  Transporter
+}
+
+enum UserStatus {
+  Active
+  Disabled
+}
+
+enum Locale {
+  Vietnamese
+  EnglishUS
+}
+
+type JWT {
+  token: String!
+  expiresAt: DateTime!
+}
+
+type AuthData {
+  accessToken: JWT!
+  refreshToken: JWT!
+}
+
+type Product {
+  id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  name: String!
+  description: String!
+  tags: [String!]
+  originalPrice: Float!
+  salePrice: Float
+  availableQuantity: Int!
+  totalSold: Int!
+  categoryId: String
+  thumbnailMediaId: ID!
+  displayMediaIds: [ID!]
+  createdBy: User
+}
+
+type OrderDetail {
+  product: ID!
+  quantity: Int!
+  size: String
+  color: String
+}
+
+type Order {
+  id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  details: OrderDetail!
+  status: OrderStatus!
+}
+
+enum OrderStatus {
+  Pending
+  Splitted
+  Cancelled
+  Shipping
+  Done
+}
+
+type Query {
+  me: User!
+  getMyProducts: [Product!]!
+}
+
+type Mutation {
+  createRegisterRequest(input: CreateRegisterRequest!): Boolean!
+  register(input: RegisterInput!): AuthData!
+  login(input: LoginInput!): AuthData!
+  createLoginOTP(input: CreateLoginOTPInput!): Boolean!
+  loginWithOTP(input: LoginWithOTPInput!): AuthData!
+  createResetPasswordRequest(input: CreateResetPasswordRequestInput!): Boolean!
+  resetPassword(input: ResetPasswordInput!): Boolean!
+  changePassword(input: ChangePasswordInput!): Boolean!
+  logoutAllDevice: Boolean!
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(input: UpdateProductInput!): Boolean!
+  createOrder(input: CreateOrderInput!): Order!
+}
+
+input CreateRegisterRequest {
+  phoneNumber: String!
+}
+
+input RegisterInput {
+  fullName: String!
+  phoneNumber: String!
+  password: String!
+  otp: String!
+  actualRole: ActualRole! = Customer
+}
+
+input LoginInput {
+  emailOrPhoneNumberOrUsername: String!
+  password: String!
+}
+
+input CreateLoginOTPInput {
+  phoneNumber: String!
+}
+
+input LoginWithOTPInput {
+  phoneNumber: String!
+  otp: String!
+}
+
+input CreateResetPasswordRequestInput {
+  phoneNumber: String!
+}
+
+input ResetPasswordInput {
+  phoneNumber: String!
+  otp: String!
+  newPassword: String!
+}
+
+input ChangePasswordInput {
+  currentPassword: String!
+  newPassword: String!
+}
+
+input CreateProductInput {
+  name: String!
+  description: String!
+  tags: [String!]
+  originalPrice: Float!
+  availableQuantity: Int!
+  categoryId: ID
+  thumbnailMediaId: ID!
+  displayMediaIds: [String!]
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  tags: [String!]
+  originalPrice: Float
+  availableQuantity: Int
+  categoryId: ID
+  thumbnailMediaId: ID
+  displayMediaIds: [String!]
+  id: ID!
+}
+
+input CreateOrderInput {
+  orderDetails: [OrderDetailInput!]!
+}
+
+input OrderDetailInput {
+  productId: String!
+  quantity: Int! = 1
+  size: String
+  color: String
+}

@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Schema as MongoSchema } from 'mongoose';
 import { BaseEntity } from '../base.entity';
 import { ActualRole } from './enum/actual-role.enum';
+import { Locale } from './enum/locale.enum';
 import { Role } from './enum/role.enum';
 import { UserStatus } from './enum/user-status.enum';
 
@@ -57,7 +58,11 @@ export class User extends BaseEntity {
 
   @Prop({ type: Array<string> })
   @Field(() => [String], { nullable: true })
-  searchHistory?: string[];
+  searchProductHistory?: string[];
+
+  @Prop({ type: String, enum: Locale, default: Locale.Vietnamese })
+  @Field(() => Locale)
+  locale: Locale;
 }
 
 export type UserDocument = User & Document;

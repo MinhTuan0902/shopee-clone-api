@@ -5,6 +5,12 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 import { GraphQLFormattedError } from 'graphql';
+import {
+  I18nModule,
+  GraphQLWebsocketResolver,
+  QueryResolver,
+  AcceptLanguageResolver,
+} from 'nestjs-i18n';
 import { join } from 'path';
 import { ENVVariable, NodeENV } from '../env/env.constant';
 import { ENVModule } from '../env/env.module';
@@ -20,9 +26,6 @@ import { ENVService } from '../env/env.service';
       },
       autoSchemaFile: {
         path: join(process.cwd(), 'generated/schema.gql'),
-      },
-      definitions: {
-        path: join(process.cwd(), 'generated/schema.ts'),
       },
       formatError: (
         formattedError: GraphQLFormattedError,
@@ -74,6 +77,20 @@ import { ENVService } from '../env/env.service';
           secret: envService.get(ENVVariable.JWTSecret),
         };
       },
+    }),
+
+    I18nModule.forRoot({
+      fallbackLanguage: 'en',
+      loaderOptions: {
+        path: join(process.cwd(), '/i18n/'),
+        watch: true,
+      },
+      typesOutputPath: join(process.cwd(), '/generated/i18n.ts'),
+      resolvers: [
+        GraphQLWebsocketResolver,
+        { use: QueryResolver, options: ['lang'] },
+        AcceptLanguageResolver,
+      ],
     }),
   ],
 })
