@@ -4,7 +4,7 @@ import { Redis } from 'ioredis';
 import { ENVVariable } from '../env/env.constant';
 import { ENVModule } from '../env/env.module';
 import { ENVService } from '../env/env.service';
-import { CustomRedisService } from './customer-redis.service';
+import { CustomRedisService } from './custom-redis.service';
 
 class RedisServerError extends Error {
   constructor() {

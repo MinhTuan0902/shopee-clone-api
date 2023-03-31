@@ -1,10 +1,10 @@
-import { GraphQLUnauthorizedError } from '@common/error';
+import { GraphQLUnauthorizedError } from '@common/error/graphql.error';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { JwtService } from '@nestjs/jwt';
 import { now } from 'lib/util/time';
-import { ExpiredTokenError } from '../error';
-import { JWTData } from '../type';
+import { ExpiredTokenError } from '../error/auth.error';
+import { JWTData } from '../type/jwt-data.type';
 
 @Injectable()
 export class JWTGuard implements CanActivate {

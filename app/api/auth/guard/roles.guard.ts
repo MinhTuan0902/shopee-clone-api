@@ -1,9 +1,12 @@
-import { GraphQLForbiddenError, GraphQLUnauthorizedError } from '@common/error';
-import { Role } from '@entity/user/enum';
+import {
+  GraphQLForbiddenError,
+  GraphQLUnauthorizedError,
+} from '@common/error/graphql.error';
+import { Role } from '@mongodb/entity/user/enum/role.enum';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
-import { ROLES_KEY } from '../decorator';
+import { ROLES_KEY } from '../decorator/roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {

@@ -1,4 +1,4 @@
-import { ActualRole } from '@entity/user/enum';
+import { ActualRole } from '@mongodb/entity/user/enum/actual-role.enum';
 import { SetMetadata } from '@nestjs/common';
 
 export const ACTUAL_ROLE_KEY = 'actualRole';

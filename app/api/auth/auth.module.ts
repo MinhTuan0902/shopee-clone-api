@@ -2,23 +2,32 @@ import { CustomRedisModule } from '@common/module/custom-redis/custom-redis.modu
 import { ENVVariable } from '@common/module/env/env.constant';
 import { ENVModule } from '@common/module/env/env.module';
 import { ENVService } from '@common/module/env/env.service';
-import { RefreshToken, RefreshTokenSchema } from '@entity/refresh-token';
-import { ShopeeSetting, ShopeeSettingSchema } from '@entity/setting';
-import { User, UserSchema } from '@entity/user';
+import {
+  RefreshToken,
+  RefreshTokenSchema,
+} from '@mongodb/entity/refresh-token/refresh-token.entity';
+import {
+  ShopeeSetting,
+  ShopeeSettingSchema,
+} from '@mongodb/entity/setting/shopee-setting.entity';
+import { User, UserSchema } from '@mongodb/entity/user/user.entity';
 import { Module } from '@nestjs/common';
 import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
-import { SMSSenderModule } from '@worker/sms-sender/sms-sender.module';
-import { ActualRolesGuard, JWTGuard, RolesGuard } from './guard';
-import { AuthMutationResolver, AuthQueryResolver } from './resolver';
-import { AuthService } from './service';
-import { JWTStrategy } from './strategy';
+import { SendSMSModule } from '@worker/send-sms/send-sms.module';
+import { AuthMutationResolver } from './auth-mutation.resolver';
+import { AuthQueryResolver } from './auth-query.resolver';
+import { AuthService } from './auth.service';
+import { ActualRolesGuard } from './guard/actual-role.guard';
+import { JWTGuard } from './guard/jwt.guard';
+import { RolesGuard } from './guard/roles.guard';
+import { JWTStrategy } from './strategy/jwt.strategy';
 
 @Module({
   imports: [
     ENVModule,
     CustomRedisModule,
-    SMSSenderModule,
+    SendSMSModule,
 
     MongooseModule.forFeature([
       { name: User.name, schema: UserSchema },
@@ -52,5 +61,6 @@ import { JWTStrategy } from './strategy';
     RolesGuard,
     ActualRolesGuard,
   ],
+  exports: [JwtModule],
 })
 export class AuthModule {}

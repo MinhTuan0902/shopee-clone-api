@@ -1,4 +1,4 @@
-import { GraphQLUnauthorizedError } from '@common/error';
+import { GraphQLUnauthorizedError } from '@common/error/graphql.error';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -59,7 +59,7 @@ import { ENVService } from '../env/env.service';
         const nodeENV = envService.get(ENVVariable.NodeENV);
         return {
           uri:
-            nodeENV === NodeENV.Develop
+            nodeENV === NodeENV.Development
               ? envService.get(ENVVariable.MongoURIDevelop)
               : envService.get(ENVVariable.MongoURIProduction),
         };

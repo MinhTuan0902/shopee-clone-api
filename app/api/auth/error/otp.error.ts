@@ -1,4 +1,4 @@
-import { GraphQLBadRequestError } from '@common/error';
+import { GraphQLBadRequestError } from '@common/error/graphql.error';
 
 export class OTPHasBeenSentBeforeError extends GraphQLBadRequestError {
   constructor() {

@@ -1,19 +1,26 @@
 import { BullModuleOptions } from '@nestjs/bull';
 
 export enum QueueName {
-  SMSSender = 'sms:sender',
-  EmailSender = 'email:sender',
+  SendSMS = 'send-sms',
+  SendEmail = 'send-email',
+  DeleteProducts = 'delete-products',
 }
 
 export const BullRegisterQueuesConfig: Record<string, BullModuleOptions> = {
-  smsSender: {
-    name: QueueName.SMSSender,
+  sendSMS: {
+    name: QueueName.SendSMS,
     defaultJobOptions: {
       removeOnComplete: true,
     },
   },
-  emailSender: {
-    name: QueueName.EmailSender,
+  sendEmail: {
+    name: QueueName.SendEmail,
+    defaultJobOptions: {
+      removeOnComplete: true,
+    },
+  },
+  deleteProducts: {
+    name: QueueName.DeleteProducts,
     defaultJobOptions: {
       removeOnComplete: true,
     },

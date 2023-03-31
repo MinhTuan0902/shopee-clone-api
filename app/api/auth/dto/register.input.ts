@@ -1,5 +1,5 @@
-import { ActualRole } from '@entity/user/enum';
-import { InputType, Field } from '@nestjs/graphql';
+import { ActualRole } from '@mongodb/entity/user/enum/actual-role.enum';
+import { Field, InputType } from '@nestjs/graphql';
 
 // TODO: update validate and validator decorators
 

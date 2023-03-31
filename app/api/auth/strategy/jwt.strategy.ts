@@ -3,7 +3,7 @@ import { ENVService } from '@common/module/env/env.service';
 import { Injectable } from '@nestjs/common/decorators';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { JWTData } from '../type';
+import { JWTData } from '../type/jwt-data.type';
 
 @Injectable()
 export class JWTStrategy extends PassportStrategy(Strategy) {
