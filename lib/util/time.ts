@@ -2,8 +2,8 @@ export type TimeUnit = 'second' | 'millisecond';
 
 /**
  *
- * @param {number} second Second to convert to millisecond
- * @returns Return millisecond
+ * @param second Second to convert to millisecond
+ * @returns Millisecond
  */
 export function secondToMillisecond(second: number): number {
   return second * 1000;
@@ -11,8 +11,8 @@ export function secondToMillisecond(second: number): number {
 
 /**
  *
- * @param {number} millisecond Millisecond to convert to second
- * @returns Return second
+ * @param millisecond Millisecond to convert to second
+ * @returns Second
  */
 export function millisecondToSecond(millisecond: number): number {
   return millisecond / 1000;
@@ -20,8 +20,8 @@ export function millisecondToSecond(millisecond: number): number {
 
 /**
  *
- * @param {TimeUnit} timeUnit Time unit
- * @returns Returns current time based on time unit input
+ * @param timeUnit Time unit
+ * @returns Current time based on time unit input
  */
 export function now(timeUnit: TimeUnit): number {
   switch (timeUnit) {

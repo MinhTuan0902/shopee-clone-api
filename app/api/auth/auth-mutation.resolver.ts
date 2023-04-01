@@ -16,7 +16,6 @@ import { User, UserDocument } from '@mongodb/entity/user/user.entity';
 import { Ip } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
-import { generateMongoIdString } from '@util/mongo-id';
 import { SendSMSService } from '@worker/send-sms/send-sms.service';
 import { generateNumberOTP } from 'lib/util/otp';
 import { comparePassword, encryptPassword } from 'lib/util/password';
@@ -113,21 +112,27 @@ export class AuthMutationResolver {
         ...input,
         password: await encryptPassword(password),
       });
-      const refreshTokenId = generateMongoIdString();
-      const authData = await this.authService.createAuthData(
+      const refreshToken = await this.authService.generateRefreshToken();
+      const jwtPayload = await this.authService.extractJWTDataFromUser(
         newUser,
-        refreshTokenId,
+        refreshToken.token,
       );
+      const accessToken = await this.authService.generateAccessToken(
+        jwtPayload,
+      );
+
       this.refreshTokenModel.create({
-        _id: refreshTokenId,
         userId: newUser.id,
         ipAddress: ip,
         deviceName: userAgent,
-        ...authData.refreshToken,
+        ...refreshToken,
       });
       this.customRedisService.del(key);
 
-      return authData;
+      return {
+        accessToken,
+        refreshToken,
+      };
     } catch (error) {
       throw new GraphQLBadRequestError({
         messageCode: 'UNCAUGHT_ERROR',
@@ -177,20 +182,24 @@ export class AuthMutationResolver {
       throw new MaxDeviceLoginExceedError();
     }
 
-    const refreshTokenId = generateMongoIdString();
-    const authData = await this.authService.createAuthData(
+    const refreshToken = await this.authService.generateRefreshToken();
+    const jwtPayload = await this.authService.extractJWTDataFromUser(
       user,
-      refreshTokenId,
+      refreshToken.token,
     );
+    const accessToken = await this.authService.generateAccessToken(jwtPayload);
+
     this.refreshTokenModel.create({
-      _id: refreshTokenId,
       userId: user.id,
-      deviceName: userAgent,
       ipAddress: ip,
-      ...authData.refreshToken,
+      deviceName: userAgent,
+      ...refreshToken,
     });
 
-    return authData;
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   @Mutation(() => Boolean)
@@ -256,21 +265,25 @@ export class AuthMutationResolver {
       throw new MaxDeviceLoginExceedError();
     }
 
-    const refreshTokenId = generateMongoIdString();
-    const authData = await this.authService.createAuthData(
+    const refreshToken = await this.authService.generateRefreshToken();
+    const jwtPayload = await this.authService.extractJWTDataFromUser(
       user,
-      refreshTokenId,
+      refreshToken.token,
     );
+    const accessToken = await this.authService.generateAccessToken(jwtPayload);
+
     this.refreshTokenModel.create({
-      _id: refreshTokenId,
       userId: user.id,
-      deviceName: userAgent,
       ipAddress: ip,
-      ...authData.refreshToken,
+      deviceName: userAgent,
+      ...refreshToken,
     });
     this.customRedisService.del(key);
 
-    return authData;
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   @Mutation(() => Boolean)
@@ -362,7 +375,7 @@ export class AuthMutationResolver {
 
   @RequireUser()
   @Mutation(() => Boolean)
-  async logoutAllDevice(@CurrentUser() { userId, refreshTokenId }: JWTData) {
+  async logoutAllDevice(@CurrentUser() { userId, refreshToken }: JWTData) {
     await this.refreshTokenModel.updateMany(
       {
         userId,
@@ -370,8 +383,8 @@ export class AuthMutationResolver {
         expiresAt: {
           $gt: new Date(),
         },
-        _id: {
-          $ne: refreshTokenId,
+        token: {
+          $ne: refreshToken,
         },
       },
       {

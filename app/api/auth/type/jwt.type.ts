@@ -1,4 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
+import { JWTType } from '../enum/jwt-type.enum';
 
 @ObjectType()
 export class JWT {
@@ -7,4 +8,7 @@ export class JWT {
 
   @Field(() => Date)
   expiresAt: Date;
+
+  @Field(() => JWTType)
+  type: JWTType;
 }

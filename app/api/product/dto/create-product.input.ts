@@ -1,4 +1,3 @@
-import { Category } from '@mongodb/entity/category/category.entity';
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
 
 @InputType()

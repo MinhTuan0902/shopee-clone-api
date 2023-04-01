@@ -51,6 +51,7 @@
     "libphonenumber-js": "^1.10.24",
     "lodash": "^4.17.21",
     "mongoose": "^7.0.2",
+    "nanoid": "^4.0.2",
     "nestjs-dataloader": "^9.0.0",
     "nestjs-i18n": "^10.2.6",
     "nestjs-twilio": "^4.1.1",
@@ -59,7 +60,8 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "ts-morph": "^17.0.1",
-    "twilio": "^4.8.0"
+    "twilio": "^4.8.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@golevelup/ts-jest": "^0.3.5",

@@ -1,4 +1,5 @@
 import { ActualRole } from '@mongodb/entity/user/enum/actual-role.enum';
+import { Locale } from '@mongodb/entity/user/enum/locale.enum';
 import { Field, InputType } from '@nestjs/graphql';
 
 // TODO: update validate and validator decorators
@@ -25,4 +26,7 @@ export class RegisterInput {
 
   @Field(() => ActualRole, { defaultValue: ActualRole.Customer })
   actualRole: ActualRole;
+
+  @Field(() => Locale, { defaultValue: Locale.Vietnamese })
+  locale: Locale;
 }

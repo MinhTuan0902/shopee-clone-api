@@ -48,6 +48,12 @@ enum Locale {
 type JWT {
   token: String!
   expiresAt: DateTime!
+  type: JWTType!
+}
+
+enum JWTType {
+  AccessToken
+  RefreshToken
 }
 
 type AuthData {
@@ -133,6 +139,7 @@ input RegisterInput {
   password: String!
   otp: String!
   actualRole: ActualRole! = Customer
+  locale: Locale! = Vietnamese
 }
 
 input LoginInput {

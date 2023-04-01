@@ -4,9 +4,10 @@ import { User } from '@mongodb/entity/user/user.entity';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { now } from '@util/time';
-import { AuthData } from './type/auth-data.type';
 import { JWTData } from './type/jwt-data.type';
 import { JWT } from './type/jwt.type';
+import { generateUUIDv4 } from '@util/uuid';
+import { JWTType } from './enum/jwt-type.enum';
 
 @Injectable()
 export class AuthService {
@@ -15,14 +16,18 @@ export class AuthService {
     private readonly envService: ENVService,
   ) {}
 
-  extractJWTDataFromUser(user: User, refreshTokenId: string): JWTData {
+  async extractJWTDataFromUser(
+    user: User,
+    refreshToken: string,
+  ): Promise<JWTData> {
     return {
       userId: user.id,
       email: user?.email,
       phoneNumber: user?.phoneNumber,
       roles: user.roles,
       actualRole: user.actualRole,
-      refreshTokenId,
+      refreshToken,
+      locale: user.locale,
     };
   }
 
@@ -36,30 +41,20 @@ export class AuthService {
     return {
       token,
       expiresAt: new Date(now('millisecond') + +accessTokenExpirationTime),
+      type: JWTType.AccessToken,
     };
   }
 
-  async generateRefreshToken(payload: JWTData): Promise<JWT> {
+  async generateRefreshToken(): Promise<JWT> {
     const refreshTokenExpirationTime = this.envService.get(
       ENVVariable.JWTRefreshTokenExpirationTime,
     );
-    const token = this.jwtService.sign(payload, {
-      expiresIn: refreshTokenExpirationTime,
-    });
+    const token = generateUUIDv4();
+
     return {
       token,
       expiresAt: new Date(now('millisecond') + +refreshTokenExpirationTime),
-    };
-  }
-
-  async createAuthData(user: User, refreshTokenId: string): Promise<AuthData> {
-    const jwtPayload = this.extractJWTDataFromUser(user, refreshTokenId);
-    const accessToken = await this.generateAccessToken(jwtPayload);
-    const refreshToken = await this.generateRefreshToken(jwtPayload);
-
-    return {
-      accessToken,
-      refreshToken,
+      type: JWTType.RefreshToken,
     };
   }
 }
