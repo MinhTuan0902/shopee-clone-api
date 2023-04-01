@@ -17,4 +17,6 @@ export class AuthQueryResolver {
   me(@CurrentUser() { userId }: JWTData): Promise<User> {
     return this.userModel.findOne({ _id: userId });
   }
+
+  // TODO: refresh token
 }

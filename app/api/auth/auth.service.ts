@@ -15,13 +15,14 @@ export class AuthService {
     private readonly envService: ENVService,
   ) {}
 
-  extractJWTDataFromUser(user: User): JWTData {
+  extractJWTDataFromUser(user: User, refreshTokenId: string): JWTData {
     return {
       userId: user.id,
       email: user?.email,
       phoneNumber: user?.phoneNumber,
       roles: user.roles,
       actualRole: user.actualRole,
+      refreshTokenId,
     };
   }
 
@@ -51,8 +52,8 @@ export class AuthService {
     };
   }
 
-  async createAuthData(user: User): Promise<AuthData> {
-    const jwtPayload = this.extractJWTDataFromUser(user);
+  async createAuthData(user: User, refreshTokenId: string): Promise<AuthData> {
+    const jwtPayload = this.extractJWTDataFromUser(user, refreshTokenId);
     const accessToken = await this.generateAccessToken(jwtPayload);
     const refreshToken = await this.generateRefreshToken(jwtPayload);
 

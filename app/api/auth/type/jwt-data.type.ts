@@ -5,6 +5,7 @@ export class JWTData {
   userId: string;
   roles: Role[];
   actualRole: ActualRole;
+  refreshTokenId: string;
   email?: string;
   phoneNumber?: string;
 }

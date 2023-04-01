@@ -16,6 +16,7 @@ import { User, UserDocument } from '@mongodb/entity/user/user.entity';
 import { Ip } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
+import { generateMongoIdString } from '@util/mongo-id';
 import { SendSMSService } from '@worker/send-sms/send-sms.service';
 import { generateNumberOTP } from 'lib/util/otp';
 import { comparePassword, encryptPassword } from 'lib/util/password';
@@ -92,7 +93,11 @@ export class AuthMutationResolver {
   }
 
   @Mutation(() => AuthData)
-  async register(@Args('input') input: RegisterInput): Promise<AuthData> {
+  async register(
+    @Args('input') input: RegisterInput,
+    @UserAgent() userAgent: string,
+    @Ip() ip: string,
+  ): Promise<AuthData> {
     const { phoneNumber, otp, password } = input;
     const key = `otp:register:${phoneNumber}`;
     const otpInRedis = await this.customRedisService.get(key);
@@ -108,9 +113,16 @@ export class AuthMutationResolver {
         ...input,
         password: await encryptPassword(password),
       });
-      const authData = await this.authService.createAuthData(newUser);
+      const refreshTokenId = generateMongoIdString();
+      const authData = await this.authService.createAuthData(
+        newUser,
+        refreshTokenId,
+      );
       this.refreshTokenModel.create({
+        _id: refreshTokenId,
         userId: newUser.id,
+        ipAddress: ip,
+        deviceName: userAgent,
         ...authData.refreshToken,
       });
       this.customRedisService.del(key);
@@ -165,12 +177,17 @@ export class AuthMutationResolver {
       throw new MaxDeviceLoginExceedError();
     }
 
-    const authData = await this.authService.createAuthData(user);
+    const refreshTokenId = generateMongoIdString();
+    const authData = await this.authService.createAuthData(
+      user,
+      refreshTokenId,
+    );
     this.refreshTokenModel.create({
+      _id: refreshTokenId,
       userId: user.id,
-      ...authData.refreshToken,
       deviceName: userAgent,
       ipAddress: ip,
+      ...authData.refreshToken,
     });
 
     return authData;
@@ -239,12 +256,17 @@ export class AuthMutationResolver {
       throw new MaxDeviceLoginExceedError();
     }
 
-    const authData = await this.authService.createAuthData(user);
+    const refreshTokenId = generateMongoIdString();
+    const authData = await this.authService.createAuthData(
+      user,
+      refreshTokenId,
+    );
     this.refreshTokenModel.create({
+      _id: refreshTokenId,
       userId: user.id,
-      ...authData.refreshToken,
       deviceName: userAgent,
       ipAddress: ip,
+      ...authData.refreshToken,
     });
     this.customRedisService.del(key);
 
@@ -338,17 +360,18 @@ export class AuthMutationResolver {
     return true;
   }
 
-  // TODO: Logout tất cả thiết bị, ngoại trừ thiết bị đang đăng nhập
-  // TODO: refresh token
   @RequireUser()
   @Mutation(() => Boolean)
-  async logoutAllDevice(@CurrentUser() { userId }: JWTData) {
+  async logoutAllDevice(@CurrentUser() { userId, refreshTokenId }: JWTData) {
     await this.refreshTokenModel.updateMany(
       {
         userId,
         revokedAt: null,
         expiresAt: {
           $gt: new Date(),
+        },
+        _id: {
+          $ne: refreshTokenId,
         },
       },
       {
