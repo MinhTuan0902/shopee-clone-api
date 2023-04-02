@@ -111,6 +111,7 @@ enum OrderStatus {
 
 type Query {
   me: User!
+  getAccessToken(refreshToken: String!): JWT!
   getMyProducts: [Product!]!
 }
 

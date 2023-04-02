@@ -6,11 +6,11 @@ import { User, UserDocument } from '@mongodb/entity/user/user.entity';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { AuthService } from './auth.service';
 import { CurrentUser } from './decorator/current-user.decorator';
 import { RequireUser } from './decorator/require-user.decorator';
+import { ExpiredTokenError, InvalidAuthTokenError } from './error/auth.error';
 import { JWTData } from './type/jwt-data.type';
-import { ExpiredTokenError } from './error/auth.error';
-import { AuthService } from './auth.service';
 import { JWT } from './type/jwt.type';
 
 @Resolver()
@@ -40,8 +40,8 @@ export class AuthQueryResolver {
       token: refreshToken,
       userId,
     });
+    if (!refreshTokenRecord) throw new InvalidAuthTokenError();
     if (
-      !refreshTokenRecord ||
       refreshTokenRecord?.revokedAt ||
       refreshTokenRecord.expiresAt <= new Date()
     ) {
