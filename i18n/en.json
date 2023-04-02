@@ -6,7 +6,8 @@
     "NOT_REGISTERED_PHONE_NUMBER": "Phone number has not been registered",
     "DISABLED_USER": "User is disabled",
     "MAX_LOGGED_DEVICE": "Account is logged at many devices",
-    "EXPIRED_TOKEN": "Token is expired"
+    "EXPIRED_TOKEN": "Token is expired",
+    "INVALID_AUTH_TOKEN": "Auth token is invalid"
   },
   "PRODUCT": {
     "NOT_FOUND": "Product is not found",

@@ -73,3 +73,13 @@ export class ExpiredTokenError extends GraphQLBadRequestError {
     this.name = 'ExpiredTokenError';
   }
 }
+
+export class InvalidAuthTokenError extends GraphQLBadRequestError {
+  constructor(locale: Locale = Locale.Vietnamese) {
+    super({
+      messageCode: 'INVALID_AUTH_TOKEN',
+      message: 'Auth token is invalid',
+    });
+    this.name = 'InvalidAuthTokenError';
+  }
+}

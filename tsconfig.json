@@ -18,27 +18,14 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@api/*": [
-        "app/api/*"
-      ],
-      "@worker/*": [
-        "app/worker/*"
-      ],
-      "@entity/*": [
-        "lib/entity/*"
-      ],
-      "@interface/*": [
-        "lib/interface/*"
-      ],
-      "@common/*": [
-        "lib/common/*"
-      ],
-      "@util/*": [
-        "lib/util/*"
-      ],
-      "@mongodb/*": [
-        "lib/database/mongodb/*"
-      ]
+      "@api/*": ["app/api/*"],
+      "@worker/*": ["app/worker/*"],
+      "@entity/*": ["lib/entity/*"],
+      "@interface/*": ["lib/interface/*"],
+      "@common/*": ["lib/common/*"],
+      "@util/*": ["lib/util/*"],
+      "@mongodb/*": ["lib/database/mongodb/*"],
+      "@generated/*": ["generated/*"]
     },
     "allowJs": true
   }

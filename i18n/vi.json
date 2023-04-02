@@ -6,7 +6,8 @@
     "NOT_REGISTERED_PHONE_NUMBER": "Số điện thoại này chưa được đăng ký với bất kỳ tài khoản nào",
     "DISABLED_USER": "Tài khoản của bạn đã bị vô hiệu hóa",
     "MAX_LOGGED_DEVICE": "Tài khoản của bạn đang đăng nhập trên nhiều thiết bị",
-    "EXPIRED_TOKEN": "Phiên đã hết hạn, vui lòng đăng nhập lại"
+    "EXPIRED_TOKEN": "Phiên đã hết hạn, vui lòng đăng nhập lại",
+    "INVALID_AUTH_TOKEN": "Thông tin xác thực không hợp lệ"
   },
   "PRODUCT": {
     "NOT_FOUND": "Sản phẩm không tồn tại",
