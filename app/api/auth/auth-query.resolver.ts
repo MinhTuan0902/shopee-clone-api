@@ -8,8 +8,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CurrentUser } from './decorator/current-user.decorator';
 import { RequireUser } from './decorator/require-user.decorator';
-import { AuthData } from './type/auth-data.type';
 import { JWTData } from './type/jwt-data.type';
+import { ExpiredTokenError } from './error/auth.error';
+import { AuthService } from './auth.service';
+import { JWT } from './type/jwt.type';
 
 @Resolver()
 export class AuthQueryResolver {
@@ -17,6 +19,8 @@ export class AuthQueryResolver {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @InjectModel(RefreshToken.name)
     private readonly refreshTokenModel: Model<RefreshTokenDocument>,
+
+    private readonly authService: AuthService,
   ) {}
 
   @RequireUser()
@@ -25,22 +29,32 @@ export class AuthQueryResolver {
     return this.userModel.findOne({ _id: userId });
   }
 
-  // TODO: refresh token
+  // TODO: pass {locale} to custom errors constructor for multi langs response
   @RequireUser()
-  @Query(() => AuthData)
-  async getAuthData(
+  @Query(() => JWT)
+  async getAccessToken(
     @Args('refreshToken') refreshToken: string,
-    @CurrentUser() { userId }: JWTData,
-  ): Promise<AuthData> {
+    @CurrentUser() { userId, locale }: JWTData,
+  ): Promise<JWT> {
     const refreshTokenRecord = await this.refreshTokenModel.findOne({
       token: refreshToken,
-      revokedAt: null,
       userId,
     });
-    if (!refreshTokenRecord) {
-      // THROW ERROR
+    if (
+      !refreshTokenRecord ||
+      refreshTokenRecord?.revokedAt ||
+      refreshTokenRecord.expiresAt <= new Date()
+    ) {
+      throw new ExpiredTokenError();
     }
-    // TODO: generate auth data
-    return;
+
+    const user = await this.userModel.findOne({ _id: userId });
+    const jwtPayload = await this.authService.extractJWTDataFromUser(
+      user,
+      refreshToken,
+    );
+    const accessToken = await this.authService.generateAccessToken(jwtPayload);
+
+    return accessToken;
   }
 }
