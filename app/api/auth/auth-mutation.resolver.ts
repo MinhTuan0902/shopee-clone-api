@@ -122,7 +122,7 @@ export class AuthMutationResolver {
       );
 
       this.refreshTokenModel.create({
-        userId: newUser.id,
+        userId: newUser._id,
         ipAddress: ip,
         deviceName: userAgent,
         ...refreshToken,
@@ -172,7 +172,7 @@ export class AuthMutationResolver {
 
     const shopeeSetting = await this.shopeeSettingModel.findOne();
     const currentLoginDeviceCount = await this.refreshTokenModel.count({
-      userId: user.id,
+      userId: user._id,
       revokedAt: null,
       expiresAt: {
         $gt: new Date(),
@@ -190,7 +190,7 @@ export class AuthMutationResolver {
     const accessToken = await this.authService.generateAccessToken(jwtPayload);
 
     this.refreshTokenModel.create({
-      userId: user.id,
+      userId: user._id,
       ipAddress: ip,
       deviceName: userAgent,
       ...refreshToken,
@@ -255,7 +255,7 @@ export class AuthMutationResolver {
 
     const shopeeSetting = await this.shopeeSettingModel.findOne();
     const currentLoginDeviceCount = await this.refreshTokenModel.count({
-      userId: user.id,
+      userId: user._id,
       revokedAt: null,
       expiresAt: {
         $gt: new Date(),
@@ -273,7 +273,7 @@ export class AuthMutationResolver {
     const accessToken = await this.authService.generateAccessToken(jwtPayload);
 
     this.refreshTokenModel.create({
-      userId: user.id,
+      userId: user._id,
       ipAddress: ip,
       deviceName: userAgent,
       ...refreshToken,
@@ -336,7 +336,7 @@ export class AuthMutationResolver {
 
     await this.userModel.updateOne(
       {
-        _id: user.id,
+        _id: user._id,
       },
       {
         $set: {
