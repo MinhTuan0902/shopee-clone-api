@@ -1,4 +1,3 @@
-import { OrderStatus } from '@mongodb/entity/order/enum/order-status.enum';
 import { ProductInOrder } from '@mongodb/entity/order/order.entity';
 import { Field, InputType, Int } from '@nestjs/graphql';
 
@@ -6,24 +5,21 @@ import { Field, InputType, Int } from '@nestjs/graphql';
 export class OrderDetailInput {
   @Field(() => String)
   productId: string;
+  product: ProductInOrder;
+
+  @Field(() => String, { nullable: true })
+  type?: string;
 
   @Field(() => Int, { defaultValue: 1 })
   quantity = 1;
-
-  @Field(() => String, { nullable: true })
-  size?: string;
-
-  @Field(() => String, { nullable: true })
-  color?: string;
-
-  productInOrder: ProductInOrder;
 }
 
 @InputType()
 export class CreateOrderInput {
   @Field(() => [OrderDetailInput])
-  orderDetails: OrderDetailInput[];
+  details: OrderDetailInput[];
+
+  shippingAddress: string;
 
   createById: string;
-  status: OrderStatus = OrderStatus.Pending;
 }

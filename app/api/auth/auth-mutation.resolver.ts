@@ -14,6 +14,7 @@ import {
 import { UserStatus } from '@mongodb/entity/user/enum/user-status.enum';
 import { User, UserDocument } from '@mongodb/entity/user/user.entity';
 import { Ip } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { SendSMSService } from '@worker/send-sms/send-sms.service';
@@ -22,7 +23,6 @@ import { comparePassword, encryptPassword } from 'lib/util/password';
 import { Connection, Model } from 'mongoose';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorator/current-user.decorator';
-import { RequireUser } from './decorator/require-user.decorator';
 import {
   CreateLoginOTPInput,
   LoginInput,
@@ -36,17 +36,15 @@ import {
 import { CreateRegisterRequest, RegisterInput } from './dto/register.input';
 import {
   DisableUserError,
-  MaxDeviceLoginExceedError,
   NotRegisteredPhoneNumberError,
   RegisteredPhoneNumberError,
   WrongPasswordError,
   WrongUsernameError,
 } from './error/auth.error';
 import { OTPHasBeenSentBeforeError, WrongOTPError } from './error/otp.error';
+import { JWTGuard } from './guard/jwt.guard';
 import { AuthData } from './type/auth-data.type';
 import { JWTData } from './type/jwt-data.type';
-
-// TODO: Login trên nhiều thiết bị, thiết bị được đăng nhập với thời gian xa nhất sẽ bị đăng xuất
 
 @Resolver()
 export class AuthMutationResolver {
@@ -181,7 +179,26 @@ export class AuthMutationResolver {
       },
     });
     if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLogin) {
-      throw new MaxDeviceLoginExceedError();
+      // Revoked the last refresh token
+      await this.refreshTokenModel.findOneAndUpdate(
+        {
+          userId: user._id,
+          revokedAt: null,
+          expiresAt: {
+            $gt: new Date(),
+          },
+        },
+        {
+          $set: {
+            revokedAt: new Date(),
+          },
+        },
+        {
+          sort: {
+            createdAt: 1,
+          },
+        },
+      );
     }
 
     const refreshToken = await this.authService.generateRefreshToken();
@@ -264,7 +281,26 @@ export class AuthMutationResolver {
       },
     });
     if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLogin) {
-      throw new MaxDeviceLoginExceedError();
+      // Revoked the last refresh token
+      await this.refreshTokenModel.findOneAndUpdate(
+        {
+          userId: user._id,
+          revokedAt: null,
+          expiresAt: {
+            $gt: new Date(),
+          },
+        },
+        {
+          $set: {
+            revokedAt: new Date(),
+          },
+        },
+        {
+          sort: {
+            createdAt: 1,
+          },
+        },
+      );
     }
 
     const refreshToken = await this.authService.generateRefreshToken();
@@ -350,7 +386,7 @@ export class AuthMutationResolver {
     return true;
   }
 
-  @RequireUser()
+  @UseGuards(JWTGuard)
   @Mutation(() => Boolean)
   async changePassword(
     @Args('input') { currentPassword, newPassword }: ChangePasswordInput,
@@ -375,7 +411,7 @@ export class AuthMutationResolver {
     return true;
   }
 
-  @RequireUser()
+  @UseGuards(JWTGuard)
   @Mutation(() => Boolean)
   async logoutAllDevice(@CurrentUser() { userId, refreshToken }: JWTData) {
     await this.refreshTokenModel.updateMany(

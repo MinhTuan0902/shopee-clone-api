@@ -8,7 +8,7 @@ export function transformTextToSlugs(text: string): string {
     'àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ';
   const to =
     'aaaaaaaaaaaaaaaaaeeeeeeeeeeeduuuuuuuuuuuoooooooooooooooooiiiiiaeiiouuncyyyyy';
-  for (var i = 0; i < from.length; i++) {
+  for (let i = 0; i < from.length; i++) {
     text = text.replace(RegExp(from[i], 'gi'), to[i]);
   }
 

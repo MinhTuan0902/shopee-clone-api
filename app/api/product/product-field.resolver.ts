@@ -8,7 +8,7 @@ import { Loader } from 'nestjs-dataloader/dist';
 @Resolver(() => Product)
 export class ProductFieldResolver {
   @ResolveField(() => User, { nullable: true })
-  async createdBy(
+  async seller(
     @Parent() product: Product,
     @Loader(UserLoader)
     userLoader: DataLoader<Product['createById'], User>,

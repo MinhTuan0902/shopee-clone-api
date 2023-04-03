@@ -4,10 +4,8 @@ import { Schema } from 'mongoose';
 
 @ObjectType()
 export class BaseEntity {
-  _id: string;
-
   @Field(() => ID)
-  id: string;
+  _id: string;
 
   @Prop({ type: Date })
   @Field(() => Date, { nullable: true })

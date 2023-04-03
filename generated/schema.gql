@@ -3,7 +3,7 @@
 # ------------------------------------------------------
 
 type User {
-  id: ID!
+  _id: ID!
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
@@ -62,7 +62,7 @@ type AuthData {
 }
 
 type Category {
-  id: ID!
+  _id: ID!
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
@@ -73,8 +73,39 @@ type Category {
   slugs: String!
 }
 
+type Media {
+  _id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  mimetype: Mimetype!
+  originalFileName: String!
+  size: Int!
+  description: String
+  cloudUrl: String!
+}
+
+enum Mimetype {
+  Png
+  Jpeg
+  Jpg
+  Webp
+  Mp4
+}
+
+type ProductType {
+  name: String!
+  thumbnailMedia: Media!
+  availableQuantity: Int!
+  originalPrice: Float!
+  salePrice: Float
+}
+
 type Product {
-  id: ID!
+  _id: ID!
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
@@ -90,33 +121,41 @@ type Product {
   availableQuantity: Int!
   totalSold: Int!
   categoryId: String
-  thumbnailMediaId: ID!
+  thumbnailMedia: Media!
   displayMediaIds: [ID!]
-  createdBy: User
+  types: [ProductType!]
+  seller: User
+}
+
+type ProductInOrder {
+  _id: ID!
+  createById: ID!
+  name: String!
+  thumbnailMedia: Media!
+  originalPrice: Int!
+  salePrice: Int
 }
 
 type OrderDetail {
-  product: ID!
+  product: ProductInOrder!
+  type: String
   quantity: Int!
-  size: String
-  color: String
 }
 
 type Order {
-  id: ID!
+  _id: ID!
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
   createById: ID
   updateById: ID
   deleteById: ID
-  details: OrderDetail!
+  details: [OrderDetail!]!
   status: OrderStatus!
 }
 
 enum OrderStatus {
   Pending
-  Splitted
   Cancelled
   Shipping
   Done
@@ -128,6 +167,7 @@ type Query {
   getMyProducts: [Product!]!
   category(id: String!): Category
   categories: [Category!]!
+  getMyOrders: [Order!]!
 }
 
 type Mutation {
@@ -199,6 +239,15 @@ input CreateProductInput {
   categoryId: ID
   thumbnailMediaId: ID!
   displayMediaIds: [String!]
+  types: [ProductTypeInput!]
+}
+
+input ProductTypeInput {
+  name: String!
+  availableQuantity: Float!
+  thumbnailMediaId: ID!
+  originalPrice: Float
+  salePrice: Float
 }
 
 input UpdateProductInput {
@@ -208,8 +257,8 @@ input UpdateProductInput {
   originalPrice: Float
   availableQuantity: Int
   categoryId: ID
-  thumbnailMediaId: ID
   displayMediaIds: [String!]
+  types: [ProductTypeInput!]
   id: ID!
 }
 
@@ -223,12 +272,11 @@ input UpdateCategoryInput {
 }
 
 input CreateOrderInput {
-  orderDetails: [OrderDetailInput!]!
+  details: [OrderDetailInput!]!
 }
 
 input OrderDetailInput {
   productId: String!
+  type: String
   quantity: Int! = 1
-  size: String
-  color: String
 }

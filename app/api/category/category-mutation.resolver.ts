@@ -1,10 +1,12 @@
-import { CurrentUser } from '@api/auth/decorator/current-user.decorator';
-import { RequireUser } from '@api/auth/decorator/require-user.decorator';
-import { JWTData } from '@api/auth/type/jwt-data.type';
+import { Roles } from '@api/auth/decorator/roles.decorator';
+import { JWTGuard } from '@api/auth/guard/jwt.guard';
+import { RolesGuard } from '@api/auth/guard/roles.guard';
 import { Category } from '@mongodb/entity/category/category.entity';
 import { Role } from '@mongodb/entity/user/enum/role.enum';
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { transformTextToSlugs } from '@util/string';
+import { isMongoId } from 'class-validator';
 import { CategoryService } from './category.service';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
@@ -12,13 +14,13 @@ import {
   CategoryAlreadyExistedError,
   CategoryNotFoundError,
 } from './error/category.error';
-import { isMongoId } from 'class-validator';
 
 @Resolver()
 export class CategoryMutationResolver {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @RequireUser([Role.Admin])
+  @UseGuards(JWTGuard, RolesGuard)
+  @Roles(Role.Admin)
   @Mutation(() => Category)
   async createCategory(
     @Args('input') input: CreateCategoryInput,
@@ -34,7 +36,8 @@ export class CategoryMutationResolver {
     });
   }
 
-  @RequireUser([Role.Admin])
+  @UseGuards(JWTGuard, RolesGuard)
+  @Roles(Role.Admin)
   @Mutation(() => Boolean)
   async updateCategory(
     @Args('input') input: UpdateCategoryInput,
