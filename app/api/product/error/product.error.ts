@@ -10,11 +10,31 @@ export class ProductNotFoundError extends GraphQLBadRequestError {
   }
 }
 
-export class ProductAlreadyExistedError extends GraphQLBadRequestError {
+export class ProductTypeNotFoundError extends GraphQLBadRequestError {
   constructor() {
     super({
+      messageCode: 'PRODUCT_TYPE_NOT_FOUND',
+      message: 'Product type is not found',
+    });
+    this.name = 'ProductTypeNotFoundError';
+  }
+}
+
+export class ProductSoldOutError extends GraphQLBadRequestError {
+  constructor(name: string) {
+    super({
+      messageCode: 'PRODUCT_SOLD_OUT',
+      message: 'Product is sold out',
+    });
+    this.name = 'ProductSoldOutError';
+  }
+}
+
+export class ProductAlreadyExistedError extends GraphQLBadRequestError {
+  constructor(name: string) {
+    super({
       messageCode: 'PRODUCT_ALREADY_EXISTED',
-      message: 'Product already existed',
+      message: `Product ${name} already existed`,
     });
     this.name = 'ProductAlreadyExistedError';
   }
@@ -37,5 +57,15 @@ export class DisplayMediasNotFoundError extends GraphQLBadRequestError {
       message: 'Display medias are not found',
     });
     this.name = 'DisplayMediasNotFoundError';
+  }
+}
+
+export class InvalidProductQuantityError extends GraphQLBadRequestError {
+  constructor() {
+    super({
+      messageCode: 'INVALID_PRODUCT_QUANTITY',
+      message: 'Quantity is invalid',
+    });
+    this.name = 'InvalidProductQuantityError';
   }
 }

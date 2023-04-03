@@ -21,7 +21,7 @@ export class AuthService {
     refreshToken: string,
   ): Promise<JWTData> {
     return {
-      userId: user.id,
+      userId: user._id,
       email: user?.email,
       phoneNumber: user?.phoneNumber,
       roles: user.roles,

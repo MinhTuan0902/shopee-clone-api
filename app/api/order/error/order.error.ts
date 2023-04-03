@@ -10,6 +10,16 @@ export class ProductAvailableQuantityNotEnoughError extends GraphQLBadRequestErr
   }
 }
 
+export class InvalidProductTypeError extends GraphQLBadRequestError {
+  constructor() {
+    super({
+      messageCode: 'INVALID_PRODUCT_TYPE_ERROR',
+      message: 'Create order input data must contains product type',
+    });
+    this.name = 'InvalidProductTypeError';
+  }
+}
+
 export class MaxDistinctProductOnOrderError extends GraphQLBadRequestError {
   constructor() {
     super({
@@ -17,5 +27,25 @@ export class MaxDistinctProductOnOrderError extends GraphQLBadRequestError {
       message: 'Too many distinct product on order',
     });
     this.name = 'MaxDistinctProductOnOrderError';
+  }
+}
+
+export class TooManyDistinctSellerError extends GraphQLBadRequestError {
+  constructor() {
+    super({
+      messageCode: 'TOO_MANY_DISTINCT_SELLER',
+      message: 'Order must have products from general seller',
+    });
+    this.name = 'TooManyDistinctSellerError';
+  }
+}
+
+export class OrderedProductQuantityLargerThanAvailableError extends GraphQLBadRequestError {
+  constructor() {
+    super({
+      messageCode: 'Order',
+      message: "Ordered product's quantity is larger than available quantity",
+    });
+    this.name = 'OrderedProductQuantityLargerThanAvailableError';
   }
 }

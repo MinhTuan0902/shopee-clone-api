@@ -2,17 +2,18 @@ import {
   RefreshToken,
   RefreshTokenDocument,
 } from '@mongodb/entity/refresh-token/refresh-token.entity';
+import { UserStatus } from '@mongodb/entity/user/enum/user-status.enum';
 import { User, UserDocument } from '@mongodb/entity/user/user.entity';
+import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorator/current-user.decorator';
-import { RequireUser } from './decorator/require-user.decorator';
 import { ExpiredTokenError, InvalidAuthTokenError } from './error/auth.error';
+import { JWTGuard } from './guard/jwt.guard';
 import { JWTData } from './type/jwt-data.type';
 import { JWT } from './type/jwt.type';
-import { UserStatus } from '@mongodb/entity/user/enum/user-status.enum';
 
 @Resolver()
 export class AuthQueryResolver {
@@ -24,7 +25,7 @@ export class AuthQueryResolver {
     private readonly authService: AuthService,
   ) {}
 
-  @RequireUser()
+  @UseGuards(JWTGuard)
   @Query(() => User)
   me(@CurrentUser() { userId }: JWTData): Promise<User> {
     return this.userModel.findOne({ _id: userId });

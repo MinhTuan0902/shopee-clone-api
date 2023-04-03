@@ -1,4 +1,24 @@
+import { Media } from '@mongodb/entity/media/media.entity';
 import { Field, ID, InputType, Int } from '@nestjs/graphql';
+
+@InputType()
+export class ProductTypeInput {
+  @Field(() => String)
+  name: string;
+
+  @Field(() => Number)
+  availableQuantity: number;
+
+  @Field(() => ID)
+  thumbnailMediaId: string;
+  thumbnailMedia: Media;
+
+  @Field(() => Number, { nullable: true })
+  originalPrice?: number;
+
+  @Field(() => Number, { nullable: true })
+  salePrice?: number;
+}
 
 @InputType()
 export class CreateProductInput {
@@ -22,9 +42,13 @@ export class CreateProductInput {
 
   @Field(() => ID)
   thumbnailMediaId: string;
+  thumbnailMedia: Media;
 
   @Field(() => [String], { nullable: true })
   displayMediaIds?: string[];
+
+  @Field(() => [ProductTypeInput], { nullable: true })
+  types?: ProductTypeInput[];
 
   slugs: string;
   createById: string;

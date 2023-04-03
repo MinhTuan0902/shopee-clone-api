@@ -56,13 +56,15 @@ export class User extends BaseEntity {
   @Field(() => [ID], { nullable: true })
   followingIds?: string[];
 
-  @Prop({ type: Array<string> })
+  @Prop({ type: Array<String> })
   @Field(() => [String], { nullable: true })
-  searchProductHistory?: string[];
+  textSearchingHistory?: string[];
 
   @Prop({ type: String, enum: Locale, default: Locale.Vietnamese })
   @Field(() => Locale)
   locale: Locale;
+
+  addresses: string[];
 }
 
 export type UserDocument = User & Document;

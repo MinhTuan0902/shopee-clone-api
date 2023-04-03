@@ -3,16 +3,17 @@ import { CategoryService } from '@api/category/category.service';
 import { CategoryNotFoundError } from '@api/category/error/category.error';
 import { MediaService } from '@api/media/media.service';
 import { Injectable } from '@nestjs/common';
+import { transformTextToSlugs } from '@util/string';
 import { CreateProductInput } from '../dto/create-product.input';
 import { UpdateProductInput } from '../dto/update-product.input';
 import {
   DisplayMediasNotFoundError,
+  InvalidProductQuantityError,
   ProductAlreadyExistedError,
   ProductNotFoundError,
   ThumbnailMediaNotFoundError,
 } from '../error/product.error';
 import { ProductService } from '../product.service';
-import { transformTextToSlugs } from '@util/string';
 
 @Injectable()
 export class ProductInputValidator {
@@ -26,7 +27,14 @@ export class ProductInputValidator {
     input: CreateProductInput,
     { userId }: JWTData,
   ): Promise<CreateProductInput> {
-    const { name, categoryId, thumbnailMediaId, displayMediaIds } = input;
+    const {
+      name,
+      categoryId,
+      thumbnailMediaId,
+      displayMediaIds,
+      types,
+      availableQuantity,
+    } = input;
     if (
       await this.productService.findOneBasic({
         deletedAt_equal: null,
@@ -34,17 +42,15 @@ export class ProductInputValidator {
         name_equal: name,
       })
     ) {
-      throw new ProductAlreadyExistedError();
+      throw new ProductAlreadyExistedError(name);
     }
 
-    if (
-      !(await this.mediaService.findOneBasic({
-        id_equal: thumbnailMediaId,
-        createById_equal: userId,
-      }))
-    ) {
-      throw new ThumbnailMediaNotFoundError();
-    }
+    const thumbnailMedia = await this.mediaService.findOneBasic({
+      id_equal: thumbnailMediaId,
+      createById_equal: userId,
+    });
+    if (!thumbnailMedia) throw new ThumbnailMediaNotFoundError();
+    input.thumbnailMedia = thumbnailMedia;
 
     if (displayMediaIds) {
       const displayMedias = await this.mediaService.findManyBasic({
@@ -65,6 +71,25 @@ export class ProductInputValidator {
       throw new CategoryNotFoundError();
     }
 
+    if (types && types.length) {
+      let totalQuantity = 0;
+      for (let i = 0; i < types.length; i++) {
+        if (!types[i].originalPrice) {
+          types[i].originalPrice = input.originalPrice;
+        }
+        const thumbnailMedia = await this.mediaService.findOneBasic({
+          id_equal: types[i].thumbnailMediaId,
+        });
+        if (!thumbnailMedia) {
+          throw new ThumbnailMediaNotFoundError();
+        }
+        input.types[i].thumbnailMedia = thumbnailMedia;
+        totalQuantity += types[i].availableQuantity;
+      }
+      if (totalQuantity !== availableQuantity)
+        throw new InvalidProductQuantityError();
+    }
+
     return {
       ...input,
       createById: userId,
@@ -76,6 +101,7 @@ export class ProductInputValidator {
     input: UpdateProductInput,
     { userId }: JWTData,
   ): Promise<void> {
+    const { name, categoryId, types, availableQuantity } = input;
     const productId = input.id;
     const product = await this.productService.findOneBasic({
       deletedAt_equal: null,
@@ -87,37 +113,45 @@ export class ProductInputValidator {
     }
 
     if (
-      input?.name &&
-      input?.name !== product.name &&
+      name &&
+      name !== product.name &&
       (await this.productService.findOneBasic({
         deletedAt_equal: null,
         createById_equal: userId,
-        name_equal: input?.name,
+        name_equal: name,
       }))
     ) {
-      throw new ProductAlreadyExistedError();
+      throw new ProductAlreadyExistedError(name);
     }
 
     if (
-      input?.categoryId &&
+      categoryId &&
       product?.categoryId &&
-      input?.categoryId !== product?.categoryId?.toString() &&
+      categoryId !== product?.categoryId?.toString() &&
       !(await this.categoryService.findOneBasic({
-        id_equal: input?.categoryId,
+        id_equal: categoryId,
       }))
     ) {
       throw new CategoryNotFoundError();
     }
 
-    if (
-      input?.thumbnailMediaId &&
-      input?.thumbnailMediaId !== product.thumbnailMediaId.toString() &&
-      !(await this.mediaService.findOneBasic({
-        createById_equal: userId,
-        id_equal: input?.thumbnailMediaId,
-      }))
-    ) {
-      throw new ThumbnailMediaNotFoundError();
+    if (types && availableQuantity) {
+      let totalQuantity = 0;
+      for (let i = 0; i < types.length; i++) {
+        if (!types[i].originalPrice) {
+          types[i].originalPrice = input.originalPrice;
+        }
+        const thumbnailMedia = await this.mediaService.findOneBasic({
+          id_equal: types[i].thumbnailMediaId,
+        });
+        if (!thumbnailMedia) {
+          throw new ThumbnailMediaNotFoundError();
+        }
+        input.types[i].thumbnailMedia = thumbnailMedia;
+        totalQuantity += types[i].availableQuantity;
+      }
+      if (totalQuantity !== availableQuantity)
+        throw new InvalidProductQuantityError();
     }
   }
 }

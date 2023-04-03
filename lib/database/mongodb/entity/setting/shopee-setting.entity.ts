@@ -19,9 +19,9 @@ export class ShopeeSetting {
 
   @Prop({ type: Number, default: 10 })
   @Field(() => Int, {
-    description: 'Max uploaded media quantity for 1 product',
+    description: 'Max uploaded display media quantity for 1 product',
   })
-  maxProductUploadedMediaQuantity: number;
+  maxProductUploadedDisplayMediaQuantity: number;
 }
 
 export type ShopeeSettingDocument = ShopeeSetting & Document;
