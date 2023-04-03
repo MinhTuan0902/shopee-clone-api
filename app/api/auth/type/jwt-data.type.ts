@@ -8,6 +8,6 @@ export class JWTData {
   actualRole: ActualRole;
   refreshToken: string;
   locale: Locale;
+  phoneNumber: string;
   email?: string;
-  phoneNumber?: string;
 }

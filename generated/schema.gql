@@ -61,6 +61,18 @@ type AuthData {
   refreshToken: JWT!
 }
 
+type Category {
+  id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  name: String!
+  slugs: String!
+}
+
 type Product {
   id: ID!
   createdAt: DateTime
@@ -72,6 +84,7 @@ type Product {
   name: String!
   description: String!
   tags: [String!]
+  slugs: String!
   originalPrice: Float!
   salePrice: Float
   availableQuantity: Int!
@@ -113,6 +126,8 @@ type Query {
   me: User!
   getAccessToken(refreshToken: String!): JWT!
   getMyProducts: [Product!]!
+  category(id: String!): Category
+  categories: [Category!]!
 }
 
 type Mutation {
@@ -127,6 +142,8 @@ type Mutation {
   logoutAllDevice: Boolean!
   createProduct(input: CreateProductInput!): Product!
   updateProduct(input: UpdateProductInput!): Boolean!
+  createCategory(input: CreateCategoryInput!): Category!
+  updateCategory(input: UpdateCategoryInput!): Boolean!
   createOrder(input: CreateOrderInput!): Order!
 }
 
@@ -144,7 +161,8 @@ input RegisterInput {
 }
 
 input LoginInput {
-  emailOrPhoneNumberOrUsername: String!
+  """It can be email, username or phone number"""
+  username: String!
   password: String!
 }
 
@@ -192,6 +210,15 @@ input UpdateProductInput {
   categoryId: ID
   thumbnailMediaId: ID
   displayMediaIds: [String!]
+  id: ID!
+}
+
+input CreateCategoryInput {
+  name: String!
+}
+
+input UpdateCategoryInput {
+  name: String
   id: ID!
 }
 

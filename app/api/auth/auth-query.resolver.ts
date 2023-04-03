@@ -12,6 +12,7 @@ import { RequireUser } from './decorator/require-user.decorator';
 import { ExpiredTokenError, InvalidAuthTokenError } from './error/auth.error';
 import { JWTData } from './type/jwt-data.type';
 import { JWT } from './type/jwt.type';
+import { UserStatus } from '@mongodb/entity/user/enum/user-status.enum';
 
 @Resolver()
 export class AuthQueryResolver {
@@ -30,15 +31,12 @@ export class AuthQueryResolver {
   }
 
   // TODO: pass {locale} to custom errors constructor for multi langs response
-  @RequireUser()
   @Query(() => JWT)
   async getAccessToken(
     @Args('refreshToken') refreshToken: string,
-    @CurrentUser() { userId, locale }: JWTData,
   ): Promise<JWT> {
     const refreshTokenRecord = await this.refreshTokenModel.findOne({
       token: refreshToken,
-      userId,
     });
     if (!refreshTokenRecord) throw new InvalidAuthTokenError();
     if (
@@ -48,7 +46,13 @@ export class AuthQueryResolver {
       throw new ExpiredTokenError();
     }
 
-    const user = await this.userModel.findOne({ _id: userId });
+    const user = await this.userModel.findOne({
+      _id: refreshTokenRecord.userId,
+      deletedAt: null,
+      status: UserStatus.Active,
+    });
+    if (!user) throw new InvalidAuthTokenError();
+
     const jwtPayload = await this.authService.extractJWTDataFromUser(
       user,
       refreshToken,

@@ -20,6 +20,10 @@ export class Product extends BaseEntity {
   @Field(() => [String], { nullable: true })
   tags?: string[];
 
+  @Prop({ type: String })
+  @Field(() => String)
+  slugs: string[];
+
   @Prop({ type: Number })
   @Field(() => Number)
   originalPrice: number;

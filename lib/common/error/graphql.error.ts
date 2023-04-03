@@ -38,7 +38,7 @@ export class GraphQLUnauthorizedError extends GraphQLError {
 
 export class GraphQLForbiddenError extends GraphQLError {
   constructor() {
-    super('Not allowed to do this action', {
+    super('You are not allowed to do this action', {
       extensions: {
         status: HttpStatus.FORBIDDEN,
         code: 'FORBIDDEN',

@@ -12,6 +12,7 @@ import {
   ThumbnailMediaNotFoundError,
 } from '../error/product.error';
 import { ProductService } from '../product.service';
+import { transformTextToSlugs } from '@util/string';
 
 @Injectable()
 export class ProductInputValidator {
@@ -67,6 +68,7 @@ export class ProductInputValidator {
     return {
       ...input,
       createById: userId,
+      slugs: transformTextToSlugs(name),
     };
   }
 

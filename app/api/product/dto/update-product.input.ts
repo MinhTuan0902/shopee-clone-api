@@ -5,4 +5,6 @@ import { CreateProductInput } from './create-product.input';
 export class UpdateProductInput extends PartialType(CreateProductInput) {
   @Field(() => ID)
   id: string;
+
+  slugs?: string;
 }
