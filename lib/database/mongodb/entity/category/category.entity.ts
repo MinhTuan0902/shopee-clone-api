@@ -9,6 +9,10 @@ export class Category extends BaseEntity {
   @Prop({ type: String })
   @Field(() => String)
   name: string;
+
+  @Prop({ type: String })
+  @Field(() => String)
+  slugs: string;
 }
 
 export type CategoryDocument = Category & Document;

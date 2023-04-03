@@ -5,6 +5,6 @@ import { JWTGuard } from '../guard/jwt.guard';
 import { RolesGuard } from '../guard/roles.guard';
 import { Roles } from './roles.decorator';
 
-export function RequireUser() {
-  return applyDecorators(UseGuards(JWTGuard, RolesGuard), Roles(Role.User));
+export function RequireUser(roles: Role[] = [Role.User]) {
+  return applyDecorators(UseGuards(JWTGuard, RolesGuard), Roles(...roles));
 }

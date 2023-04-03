@@ -14,12 +14,14 @@ export class ShopeeSetting {
   maxDistinctProductOnOrder: number;
 
   @Prop({ type: Number, default: 2 })
-  @Field(() => Int, { description: 'Max uploaded file size in MB' })
-  maxUploadedFileSize: number;
+  @Field(() => Int, { description: 'Max product uploaded media size in MB' })
+  maxProductUploadedMediaSize: number;
 
   @Prop({ type: Number, default: 10 })
-  @Field(() => Int, { description: 'Max uploaded file quantity' })
-  maxUploadedFileQuantity: number;
+  @Field(() => Int, {
+    description: 'Max uploaded media quantity for 1 product',
+  })
+  maxProductUploadedMediaQuantity: number;
 }
 
 export type ShopeeSettingDocument = ShopeeSetting & Document;

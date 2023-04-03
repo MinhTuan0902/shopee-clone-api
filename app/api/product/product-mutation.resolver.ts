@@ -7,6 +7,7 @@ import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
 import { ProductService } from './product.service';
 import { ProductInputValidator } from './validator/product-input.validator';
+import { transformTextToSlugs } from '@util/string';
 
 @Resolver()
 export class ProductMutationResolver {
@@ -38,7 +39,10 @@ export class ProductMutationResolver {
       input,
       currentUser,
     );
-    await this.productService.updateOne(input);
+    await this.productService.updateOne({
+      ...input,
+      slugs: input?.name ? transformTextToSlugs(input?.name) : undefined,
+    });
     return true;
   }
 

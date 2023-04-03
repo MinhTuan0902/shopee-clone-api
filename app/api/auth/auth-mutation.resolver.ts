@@ -46,6 +46,8 @@ import { OTPHasBeenSentBeforeError, WrongOTPError } from './error/otp.error';
 import { AuthData } from './type/auth-data.type';
 import { JWTData } from './type/jwt-data.type';
 
+// TODO: Login trên nhiều thiết bị, thiết bị được đăng nhập với thời gian xa nhất sẽ bị đăng xuất
+
 @Resolver()
 export class AuthMutationResolver {
   constructor(
@@ -149,13 +151,13 @@ export class AuthMutationResolver {
     @UserAgent() userAgent: string,
     @Ip() ip: string,
   ): Promise<AuthData> {
-    const { emailOrPhoneNumberOrUsername, password } = input;
+    const { username, password } = input;
     const user = await this.userModel.findOne({
       deletedAt: null,
       $or: [
-        { email: emailOrPhoneNumberOrUsername },
-        { phoneNumber: emailOrPhoneNumberOrUsername },
-        { username: emailOrPhoneNumberOrUsername },
+        { email: username },
+        { phoneNumber: username },
+        { username: username },
       ],
     });
     if (!user) {

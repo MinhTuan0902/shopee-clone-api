@@ -26,5 +26,6 @@ export class CreateProductInput {
   @Field(() => [String], { nullable: true })
   displayMediaIds?: string[];
 
+  slugs: string;
   createById: string;
 }
