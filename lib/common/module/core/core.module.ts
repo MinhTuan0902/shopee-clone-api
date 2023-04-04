@@ -82,15 +82,15 @@ import { ENVService } from '../env/env.service';
     I18nModule.forRoot({
       fallbackLanguage: 'en',
       loaderOptions: {
-        path: join(process.cwd(), '/i18n/'),
+        path: join(process.cwd(), 'i18n/'),
         watch: true,
       },
-      typesOutputPath: join(process.cwd(), '/generated/i18n.ts'),
-      resolvers: [
-        GraphQLWebsocketResolver,
-        { use: QueryResolver, options: ['lang'] },
-        AcceptLanguageResolver,
-      ],
+      typesOutputPath: join(process.cwd(), 'generated/i18n.ts'),
+      // resolvers: [
+      //   GraphQLWebsocketResolver,
+      //   { use: QueryResolver, options: ['lang'] },
+      //   AcceptLanguageResolver,
+      // ],
     }),
   ],
 })

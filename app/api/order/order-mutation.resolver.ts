@@ -3,6 +3,7 @@ import { CurrentUser } from '@api/auth/decorator/current-user.decorator';
 import { ActualRolesGuard } from '@api/auth/guard/actual-role.guard';
 import { JWTGuard } from '@api/auth/guard/jwt.guard';
 import { JWTData } from '@api/auth/type/jwt-data.type';
+import { AddressValidator } from '@api/geo/validator/address.validator';
 import {
   ProductNotFoundError,
   ProductSoldOutError,
@@ -26,6 +27,7 @@ export class OrderMutationResolver {
   constructor(
     private readonly orderService: OrderService,
     private readonly productService: ProductService,
+    private readonly addressValidator: AddressValidator,
   ) {}
 
   @UseGuards(JWTGuard, ActualRolesGuard)
@@ -35,7 +37,7 @@ export class OrderMutationResolver {
     @Args('input') input: CreateOrderInput,
     @CurrentUser() { userId, locale }: JWTData,
   ): Promise<Order> {
-    const { details } = input;
+    const { details, shippingAddressInput } = input;
     let sellerId: string;
     for (let i = 0; i < details.length; i++) {
       const { productId, type, quantity } = details[i];
@@ -87,6 +89,14 @@ export class OrderMutationResolver {
       input.details[i].product = productInOrder;
     }
 
-    return this.orderService.createOne({ ...input, createById: userId });
+    const shippingAddress = await this.addressValidator.validateAddressInput(
+      shippingAddressInput,
+    );
+
+    return this.orderService.createOne({
+      ...input,
+      createById: userId,
+      shippingAddress,
+    });
   }
 }

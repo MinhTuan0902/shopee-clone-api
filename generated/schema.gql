@@ -11,6 +11,7 @@ type ShopeeSetting {
 
   """Max uploaded display media quantity for 1 product"""
   maxProductUploadedDisplayMediaQuantity: Int!
+  maxShippingAddress: Int!
 }
 
 type User {
@@ -24,7 +25,7 @@ type User {
   fullName: String!
   username: String
   email: String
-  phoneNumber: String
+  phoneNumber: String!
   actualRole: ActualRole!
   status: UserStatus!
   profileImageId: ID
@@ -33,6 +34,7 @@ type User {
   followingIds: [ID!]
   textSearchingHistory: [String!]
   locale: Locale!
+  shippingAddresses: [String!]
 }
 
 """
@@ -162,6 +164,7 @@ type Order {
   updateById: ID
   deleteById: ID
   details: [OrderDetail!]!
+  shippingAddress: String!
   status: OrderStatus!
 }
 
@@ -287,12 +290,20 @@ input UpdateCategoryInput {
 
 input CreateOrderInput {
   details: [OrderDetailInput!]!
+  shippingAddressInput: AddressInput!
 }
 
 input OrderDetailInput {
   productId: String!
   type: String
   quantity: Int! = 1
+}
+
+input AddressInput {
+  provinceId: String!
+  districtId: String!
+  wardId: String!
+  detail: String!
 }
 
 input UpdateShopeeSettingInput {
