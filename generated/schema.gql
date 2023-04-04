@@ -2,6 +2,17 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type ShopeeSetting {
+  maxDeviceLogin: Int!
+  maxDistinctProductOnOrder: Int!
+
+  """Max product uploaded media size in MB"""
+  maxProductUploadedMediaSize: Int!
+
+  """Max uploaded display media quantity for 1 product"""
+  maxProductUploadedDisplayMediaQuantity: Int!
+}
+
 type User {
   _id: ID!
   createdAt: DateTime
@@ -20,7 +31,7 @@ type User {
   coverImageId: ID
   followerIds: [ID!]
   followingIds: [ID!]
-  searchProductHistory: [String!]
+  textSearchingHistory: [String!]
   locale: Locale!
 }
 
@@ -165,9 +176,11 @@ type Query {
   me: User!
   getAccessToken(refreshToken: String!): JWT!
   getMyProducts: [Product!]!
+  getProductDetail(id: String!): Product!
   category(id: String!): Category
   categories: [Category!]!
   getMyOrders: [Order!]!
+  getShopeeSetting: ShopeeSetting!
 }
 
 type Mutation {
@@ -185,6 +198,7 @@ type Mutation {
   createCategory(input: CreateCategoryInput!): Category!
   updateCategory(input: UpdateCategoryInput!): Boolean!
   createOrder(input: CreateOrderInput!): Order!
+  updateShopeeSetting(input: UpdateShopeeSettingInput!): Boolean!
 }
 
 input CreateRegisterRequest {
@@ -279,4 +293,11 @@ input OrderDetailInput {
   productId: String!
   type: String
   quantity: Int! = 1
+}
+
+input UpdateShopeeSettingInput {
+  maxDeviceLogin: Int
+  maxDistinctProductOnOrder: Int
+  maxProductUploadedMediaSize: Int
+  maxProductUploadedDisplayMediaQuantity: Int
 }
