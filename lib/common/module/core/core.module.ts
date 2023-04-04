@@ -6,10 +6,10 @@ import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { MongooseModule, MongooseModuleOptions } from '@nestjs/mongoose';
 import { GraphQLFormattedError } from 'graphql';
 import {
-  I18nModule,
-  GraphQLWebsocketResolver,
-  QueryResolver,
   AcceptLanguageResolver,
+  GraphQLWebsocketResolver,
+  I18nModule,
+  QueryResolver,
 } from 'nestjs-i18n';
 import { join } from 'path';
 import { ENVVariable, NodeENV } from '../env/env.constant';
