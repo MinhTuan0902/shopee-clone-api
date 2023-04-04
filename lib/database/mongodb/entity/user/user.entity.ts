@@ -23,8 +23,8 @@ export class User extends BaseEntity {
   email?: string;
 
   @Prop({ type: String })
-  @Field(() => String, { nullable: true })
-  phoneNumber?: string;
+  @Field(() => String)
+  phoneNumber: string;
 
   @Prop({ type: String })
   password: string;
@@ -64,7 +64,9 @@ export class User extends BaseEntity {
   @Field(() => Locale)
   locale: Locale;
 
-  addresses: string[];
+  @Prop({ type: String })
+  @Field(() => String, { nullable: true })
+  address?: String;
 }
 
 export type UserDocument = User & Document;

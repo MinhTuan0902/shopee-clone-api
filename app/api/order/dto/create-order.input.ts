@@ -1,3 +1,4 @@
+import { AddressInput } from '@api/geo/dto/address.input';
 import { ProductInOrder } from '@mongodb/entity/order/order.entity';
 import { Field, InputType, Int } from '@nestjs/graphql';
 
@@ -18,6 +19,9 @@ export class OrderDetailInput {
 export class CreateOrderInput {
   @Field(() => [OrderDetailInput])
   details: OrderDetailInput[];
+
+  @Field(() => AddressInput)
+  shippingAddressInput: AddressInput;
 
   shippingAddress: string;
 

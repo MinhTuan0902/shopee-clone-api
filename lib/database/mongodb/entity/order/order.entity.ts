@@ -69,7 +69,9 @@ export class Order extends BaseEntity {
   @Field(() => [OrderDetail])
   details: OrderDetail[];
 
-  // shippingAddress: string;
+  @Prop({ type: String })
+  @Field(() => String)
+  shippingAddress: string;
 
   @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Pending })
   @Field(() => OrderStatus)
