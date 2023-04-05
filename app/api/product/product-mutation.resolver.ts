@@ -1,8 +1,13 @@
+import { ActualRoles } from '@api/auth/decorator/actual-role.decorator';
 import { CurrentUser } from '@api/auth/decorator/current-user.decorator';
-import { RequireUser } from '@api/auth/decorator/require-user.decorator';
+import { ActualRolesGuard } from '@api/auth/guard/actual-role.guard';
+import { JWTGuard } from '@api/auth/guard/jwt.guard';
 import { JWTData } from '@api/auth/type/jwt-data.type';
 import { Product } from '@mongodb/entity/product/product.entity';
+import { ActualRole } from '@mongodb/entity/user/enum/actual-role.enum';
+import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { transformTextToSlugs } from '@util/string';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
 import { ProductService } from './product.service';
@@ -15,7 +20,8 @@ export class ProductMutationResolver {
     private readonly productInputValidator: ProductInputValidator,
   ) {}
 
-  @RequireUser()
+  @UseGuards(JWTGuard, ActualRolesGuard)
+  @ActualRoles(ActualRole.Seller)
   @Mutation(() => Product)
   async createProduct(
     @Args('input') input: CreateProductInput,
@@ -28,7 +34,8 @@ export class ProductMutationResolver {
     return this.productService.createOne(input);
   }
 
-  @RequireUser()
+  @UseGuards(JWTGuard, ActualRolesGuard)
+  @ActualRoles(ActualRole.Seller)
   @Mutation(() => Boolean)
   async updateProduct(
     @Args('input') input: UpdateProductInput,
@@ -38,8 +45,10 @@ export class ProductMutationResolver {
       input,
       currentUser,
     );
-    await this.productService.updateOne(input);
-    return true;
+    return this.productService.updateOne({
+      ...input,
+      slugs: input?.name ? transformTextToSlugs(input?.name) : undefined,
+    });
   }
 
   async deleteProducts() {}

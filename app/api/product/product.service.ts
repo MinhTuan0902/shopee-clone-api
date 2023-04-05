@@ -20,11 +20,11 @@ export class ProductService implements IService {
     private readonly productModel: Model<ProductDocument>,
   ) {}
 
-  async createOne(input: CreateProductInput): Promise<Product> {
+  createOne(input: CreateProductInput): Promise<Product> {
     return this.productModel.create(input);
   }
 
-  async findOneBasic(input: FilterProductInput): Promise<Product> {
+  findOneBasic(input: FilterProductInput): Promise<Product> {
     return this.productModel.findOne(
       this.mongoFindOperatorProcessor.convertInputFilterToMongoFindOperator(
         input,
@@ -32,7 +32,7 @@ export class ProductService implements IService {
     );
   }
 
-  async findManyBasic(input: FilterProductInput): Promise<Product[]> {
+  findManyBasic(input: FilterProductInput): Promise<Product[]> {
     return this.productModel.find(
       this.mongoFindOperatorProcessor.convertInputFilterToMongoFindOperator(
         input,
@@ -40,9 +40,13 @@ export class ProductService implements IService {
     );
   }
 
-  async updateOne(input: UpdateProductInput) {
+  async updateOne(input: UpdateProductInput): Promise<boolean> {
     const id = input.id;
     delete input.id;
-    await this.productModel.updateOne({ _id: id }, { $set: { ...input } });
+    const { matchedCount, modifiedCount } = await this.productModel.updateOne(
+      { _id: id },
+      { $set: { ...input } },
+    );
+    return matchedCount === 1 && modifiedCount === 1;
   }
 }

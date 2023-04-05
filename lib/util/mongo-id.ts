@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
 
-export function generateMongoIdString(): string {
-  return new Types.ObjectId().toString();
+export function createMongoId(id?: string): Types.ObjectId {
+  return new Types.ObjectId(id || undefined);
 }

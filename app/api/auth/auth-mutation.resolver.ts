@@ -1,5 +1,5 @@
 import { UserAgent } from '@common/decorator/context.decorator';
-import { GraphQLBadRequestError } from '@common/error/graphql.error';
+import { GraphQLUnexpectedError } from '@common/error/graphql.error';
 import { CustomRedisService } from '@common/module/custom-redis/custom-redis.service';
 import { ENVVariable } from '@common/module/env/env.constant';
 import { ENVService } from '@common/module/env/env.service';
@@ -14,6 +14,7 @@ import {
 import { UserStatus } from '@mongodb/entity/user/enum/user-status.enum';
 import { User, UserDocument } from '@mongodb/entity/user/user.entity';
 import { Ip } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
 import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { SendSMSService } from '@worker/send-sms/send-sms.service';
@@ -22,7 +23,6 @@ import { comparePassword, encryptPassword } from 'lib/util/password';
 import { Connection, Model } from 'mongoose';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorator/current-user.decorator';
-import { RequireUser } from './decorator/require-user.decorator';
 import {
   CreateLoginOTPInput,
   LoginInput,
@@ -36,13 +36,13 @@ import {
 import { CreateRegisterRequest, RegisterInput } from './dto/register.input';
 import {
   DisableUserError,
-  MaxDeviceLoginExceedError,
   NotRegisteredPhoneNumberError,
   RegisteredPhoneNumberError,
   WrongPasswordError,
   WrongUsernameError,
 } from './error/auth.error';
 import { OTPHasBeenSentBeforeError, WrongOTPError } from './error/otp.error';
+import { JWTGuard } from './guard/jwt.guard';
 import { AuthData } from './type/auth-data.type';
 import { JWTData } from './type/jwt-data.type';
 
@@ -83,7 +83,7 @@ export class AuthMutationResolver {
       value: otp,
       ttl: +otpTTL,
     });
-    this.sendSMSService.addSMSSenderPayloadToQueue({
+    this.sendSMSService.addSendSMSPayloadToQueue({
       toPhoneNumber: phoneNumber,
       body: `Your OTP to register is ${otp}`,
     });
@@ -134,10 +134,7 @@ export class AuthMutationResolver {
         refreshToken,
       };
     } catch (error) {
-      throw new GraphQLBadRequestError({
-        messageCode: 'UNCAUGHT_ERROR',
-        message: error?.message,
-      });
+      throw new GraphQLUnexpectedError();
     } finally {
       session.endSession();
     }
@@ -149,13 +146,13 @@ export class AuthMutationResolver {
     @UserAgent() userAgent: string,
     @Ip() ip: string,
   ): Promise<AuthData> {
-    const { emailOrPhoneNumberOrUsername, password } = input;
+    const { username, password } = input;
     const user = await this.userModel.findOne({
       deletedAt: null,
       $or: [
-        { email: emailOrPhoneNumberOrUsername },
-        { phoneNumber: emailOrPhoneNumberOrUsername },
-        { username: emailOrPhoneNumberOrUsername },
+        { email: username },
+        { phoneNumber: username },
+        { username: username },
       ],
     });
     if (!user) {
@@ -179,7 +176,26 @@ export class AuthMutationResolver {
       },
     });
     if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLogin) {
-      throw new MaxDeviceLoginExceedError();
+      // Revoked the last refresh token
+      await this.refreshTokenModel.findOneAndUpdate(
+        {
+          userId: user._id,
+          revokedAt: null,
+          expiresAt: {
+            $gt: new Date(),
+          },
+        },
+        {
+          $set: {
+            revokedAt: new Date(),
+          },
+        },
+        {
+          sort: {
+            createdAt: 1,
+          },
+        },
+      );
     }
 
     const refreshToken = await this.authService.generateRefreshToken();
@@ -223,7 +239,7 @@ export class AuthMutationResolver {
       value: otp,
       ttl: +otpTTL,
     });
-    this.sendSMSService.addSMSSenderPayloadToQueue({
+    this.sendSMSService.addSendSMSPayloadToQueue({
       toPhoneNumber: phoneNumber,
       body: `Your OTP to login is ${otp}`,
     });
@@ -262,7 +278,26 @@ export class AuthMutationResolver {
       },
     });
     if (currentLoginDeviceCount >= shopeeSetting.maxDeviceLogin) {
-      throw new MaxDeviceLoginExceedError();
+      // Revoked the last refresh token
+      await this.refreshTokenModel.findOneAndUpdate(
+        {
+          userId: user._id,
+          revokedAt: null,
+          expiresAt: {
+            $gt: new Date(),
+          },
+        },
+        {
+          $set: {
+            revokedAt: new Date(),
+          },
+        },
+        {
+          sort: {
+            createdAt: 1,
+          },
+        },
+      );
     }
 
     const refreshToken = await this.authService.generateRefreshToken();
@@ -306,7 +341,7 @@ export class AuthMutationResolver {
     const otp = generateNumberOTP();
     const otpTTL = this.envService.get(ENVVariable.OTPTimeToLive);
     this.customRedisService.set({ key, value: otp, ttl: +otpTTL });
-    this.sendSMSService.addSMSSenderPayloadToQueue({
+    this.sendSMSService.addSendSMSPayloadToQueue({
       toPhoneNumber: phoneNumber,
       body: `Your OTP to reset password is ${otp}`,
     });
@@ -348,7 +383,7 @@ export class AuthMutationResolver {
     return true;
   }
 
-  @RequireUser()
+  @UseGuards(JWTGuard)
   @Mutation(() => Boolean)
   async changePassword(
     @Args('input') { currentPassword, newPassword }: ChangePasswordInput,
@@ -359,7 +394,7 @@ export class AuthMutationResolver {
       throw new WrongPasswordError();
     }
 
-    await this.userModel.updateOne(
+    const { matchedCount, modifiedCount } = await this.userModel.updateOne(
       {
         _id: currentUser.userId,
       },
@@ -370,10 +405,10 @@ export class AuthMutationResolver {
       },
     );
 
-    return true;
+    return matchedCount === 1 && modifiedCount === 1;
   }
 
-  @RequireUser()
+  @UseGuards(JWTGuard)
   @Mutation(() => Boolean)
   async logoutAllDevice(@CurrentUser() { userId, refreshToken }: JWTData) {
     await this.refreshTokenModel.updateMany(

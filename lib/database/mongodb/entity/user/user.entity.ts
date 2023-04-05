@@ -23,8 +23,8 @@ export class User extends BaseEntity {
   email?: string;
 
   @Prop({ type: String })
-  @Field(() => String, { nullable: true })
-  phoneNumber?: string;
+  @Field(() => String)
+  phoneNumber: string;
 
   @Prop({ type: String })
   password: string;
@@ -58,11 +58,15 @@ export class User extends BaseEntity {
 
   @Prop({ type: Array<string> })
   @Field(() => [String], { nullable: true })
-  searchProductHistory?: string[];
+  textSearchingHistory?: string[];
 
   @Prop({ type: String, enum: Locale, default: Locale.Vietnamese })
   @Field(() => Locale)
   locale: Locale;
+
+  @Prop({ type: String })
+  @Field(() => String, { nullable: true })
+  address?: string;
 }
 
 export type UserDocument = User & Document;

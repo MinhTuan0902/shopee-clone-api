@@ -23,6 +23,18 @@ export class GraphQLBadRequestError extends GraphQLError {
   }
 }
 
+export class GraphQLUnexpectedError extends GraphQLBadRequestError {
+  protected locale: Locale;
+  protected i18nContext: I18nContext<I18nTranslations>;
+  constructor() {
+    super({
+      messageCode: 'UNEXPECTED_ERROR',
+      message: 'An unexpected error occurred',
+    });
+    this.name = 'GraphQLUnexpectedError';
+  }
+}
+
 export class GraphQLUnauthorizedError extends GraphQLError {
   constructor() {
     super('Unauthorized', {
@@ -38,7 +50,7 @@ export class GraphQLUnauthorizedError extends GraphQLError {
 
 export class GraphQLForbiddenError extends GraphQLError {
   constructor() {
-    super('Not allowed to do this action', {
+    super('You are not allowed to do this action', {
       extensions: {
         status: HttpStatus.FORBIDDEN,
         code: 'FORBIDDEN',

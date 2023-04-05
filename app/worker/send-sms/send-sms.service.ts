@@ -10,7 +10,7 @@ export class SendSMSService {
     @InjectQueue(QueueName.SendSMS) private readonly sendSMSQueue: Queue,
   ) {}
 
-  addSMSSenderPayloadToQueue(payload: SendSMSPayload) {
+  addSendSMSPayloadToQueue(payload: SendSMSPayload) {
     this.sendSMSQueue.add(payload);
   }
 }

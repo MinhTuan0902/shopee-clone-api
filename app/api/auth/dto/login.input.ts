@@ -2,8 +2,10 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class LoginInput {
-  @Field(() => String)
-  emailOrPhoneNumberOrUsername: string;
+  @Field(() => String, {
+    description: 'It can be email, username or phone number',
+  })
+  username: string;
 
   @Field(() => String)
   password: string;

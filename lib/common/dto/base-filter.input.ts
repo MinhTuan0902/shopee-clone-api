@@ -14,6 +14,18 @@ export class BaseFilterInput {
   @Field(() => [ID], { nullable: true })
   id_notIn?: string[];
 
+  @Field(() => ID, { nullable: true })
+  createById_equal?: string;
+
+  @Field(() => ID, { nullable: true })
+  createById_notEqual?: string;
+
+  @Field(() => [ID], { nullable: true })
+  createById_in?: string[];
+
+  @Field(() => [ID], { nullable: true })
+  createById_notIn?: string[];
+
   @Field(() => Date, { nullable: true })
   createdAt_equal?: Date;
 

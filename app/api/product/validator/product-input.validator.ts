@@ -3,15 +3,18 @@ import { CategoryService } from '@api/category/category.service';
 import { CategoryNotFoundError } from '@api/category/error/category.error';
 import { MediaService } from '@api/media/media.service';
 import { Injectable } from '@nestjs/common';
+import { transformTextToSlugs } from '@util/string';
 import { CreateProductInput } from '../dto/create-product.input';
 import { UpdateProductInput } from '../dto/update-product.input';
 import {
   DisplayMediasNotFoundError,
+  InvalidProductQuantityError,
   ProductAlreadyExistedError,
   ProductNotFoundError,
   ThumbnailMediaNotFoundError,
 } from '../error/product.error';
 import { ProductService } from '../product.service';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class ProductInputValidator {
@@ -25,7 +28,16 @@ export class ProductInputValidator {
     input: CreateProductInput,
     { userId }: JWTData,
   ): Promise<CreateProductInput> {
-    const { name, categoryId, thumbnailMediaId, displayMediaIds } = input;
+    const {
+      name,
+      categoryIds,
+      thumbnailMediaId,
+      displayMediaIds,
+      types,
+      availableQuantity,
+      salePrice,
+      saleTo,
+    } = input;
     if (
       await this.productService.findOneBasic({
         deletedAt_equal: null,
@@ -33,19 +45,19 @@ export class ProductInputValidator {
         name_equal: name,
       })
     ) {
-      throw new ProductAlreadyExistedError();
+      throw new ProductAlreadyExistedError(name);
     }
 
-    if (
-      !(await this.mediaService.findOneBasic({
-        id_equal: thumbnailMediaId,
-        createById_equal: userId,
-      }))
-    ) {
+    const thumbnailMedia = await this.mediaService.findOneBasic({
+      id_equal: thumbnailMediaId,
+      createById_equal: userId,
+    });
+    if (!thumbnailMedia) {
       throw new ThumbnailMediaNotFoundError();
     }
+    input.thumbnailMedia = thumbnailMedia;
 
-    if (displayMediaIds) {
+    if (displayMediaIds && displayMediaIds.length) {
       const displayMedias = await this.mediaService.findManyBasic({
         id_in: displayMediaIds,
         createById_equal: userId,
@@ -53,20 +65,47 @@ export class ProductInputValidator {
       if (displayMedias.length !== displayMediaIds.length) {
         throw new DisplayMediasNotFoundError();
       }
+      input.displayMedias = displayMedias;
     }
 
-    if (
-      categoryId &&
-      !(await this.categoryService.findOneBasic({
-        id_equal: categoryId,
-      }))
-    ) {
-      throw new CategoryNotFoundError();
+    if (categoryIds && categoryIds.length) {
+      const categories = await this.categoryService.findManyBasic({
+        id_in: categoryIds,
+      });
+      if (categoryIds.length !== categories.length) {
+        throw new CategoryNotFoundError();
+      }
+      input.categories = categories;
+    }
+
+    if (types && types.length) {
+      let totalQuantity = 0;
+      for (let i = 0; i < types.length; i++) {
+        const { originalPrice, availableQuantity } = types[i];
+        // TODO: validate
+        if (!originalPrice) {
+          types[i].originalPrice = input.originalPrice;
+        }
+        const thumbnailMedia = await this.mediaService.findOneBasic({
+          id_equal: types[i].thumbnailMediaId,
+        });
+        if (!thumbnailMedia) {
+          throw new ThumbnailMediaNotFoundError();
+        }
+        input.types[i].thumbnailMedia = thumbnailMedia;
+        totalQuantity += availableQuantity;
+      }
+      if (totalQuantity !== availableQuantity)
+        throw new InvalidProductQuantityError();
     }
 
     return {
       ...input,
       createById: userId,
+      slugs: transformTextToSlugs(name),
+      salePrice: salePrice && saleTo ? salePrice : undefined,
+      saleTo:
+        salePrice && saleTo ? dayjs(saleTo).endOf('day').toDate() : undefined,
     };
   }
 
@@ -74,6 +113,7 @@ export class ProductInputValidator {
     input: UpdateProductInput,
     { userId }: JWTData,
   ): Promise<void> {
+    const { name, categoryIds, types, availableQuantity } = input;
     const productId = input.id;
     const product = await this.productService.findOneBasic({
       deletedAt_equal: null,
@@ -85,37 +125,44 @@ export class ProductInputValidator {
     }
 
     if (
-      input?.name &&
-      input?.name !== product.name &&
+      name &&
+      name !== product.name &&
       (await this.productService.findOneBasic({
         deletedAt_equal: null,
         createById_equal: userId,
-        name_equal: input?.name,
+        name_equal: name,
       }))
     ) {
-      throw new ProductAlreadyExistedError();
+      throw new ProductAlreadyExistedError(name);
     }
 
-    if (
-      input?.categoryId &&
-      product?.categoryId &&
-      input?.categoryId !== product?.categoryId?.toString() &&
-      !(await this.categoryService.findOneBasic({
-        id_equal: input?.categoryId,
-      }))
-    ) {
-      throw new CategoryNotFoundError();
+    if (categoryIds && categoryIds.length) {
+      const categories = await this.categoryService.findManyBasic({
+        id_in: categoryIds,
+      });
+      if (categoryIds.length !== categories.length) {
+        throw new CategoryNotFoundError();
+      }
+      input.categories = categories;
     }
 
-    if (
-      input?.thumbnailMediaId &&
-      input?.thumbnailMediaId !== product.thumbnailMediaId.toString() &&
-      !(await this.mediaService.findOneBasic({
-        createById_equal: userId,
-        id_equal: input?.thumbnailMediaId,
-      }))
-    ) {
-      throw new ThumbnailMediaNotFoundError();
+    if (types && availableQuantity) {
+      let totalQuantity = 0;
+      for (let i = 0; i < types.length; i++) {
+        if (!types[i].originalPrice) {
+          types[i].originalPrice = input.originalPrice;
+        }
+        const thumbnailMedia = await this.mediaService.findOneBasic({
+          id_equal: types[i].thumbnailMediaId,
+        });
+        if (!thumbnailMedia) {
+          throw new ThumbnailMediaNotFoundError();
+        }
+        input.types[i].thumbnailMedia = thumbnailMedia;
+        totalQuantity += types[i].availableQuantity;
+      }
+      if (totalQuantity !== availableQuantity)
+        throw new InvalidProductQuantityError();
     }
   }
 }

@@ -1,8 +1,9 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document } from 'mongoose';
 import { GeoType } from './enum/geo-type.enum';
 
-@Schema({ collection: 'Geo', _id: false })
+@Schema({ collection: 'Geo' })
 @ObjectType()
 export class Geo {
   @Prop({ type: String, enum: GeoType })
@@ -13,7 +14,7 @@ export class Geo {
   @Field(() => Int)
   level: number;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   @Field(() => String)
   id: string;
 
@@ -29,3 +30,6 @@ export class Geo {
   @Field(() => String)
   code: string;
 }
+
+export type GeoDocument = Geo & Document;
+export const GeoSchema = SchemaFactory.createForClass(Geo);

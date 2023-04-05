@@ -25,11 +25,12 @@ export class ActualRolesGuard implements CanActivate {
     if (!user) {
       throw new GraphQLUnauthorizedError();
     }
-    const canDoAction = requiredActualRoles.some((role) =>
-      user?.roles?.includes(role),
+    const canDoAction = requiredActualRoles.filter(
+      (role) => user?.roles === role,
     );
-    if (canDoAction) return true;
-
-    throw new GraphQLForbiddenError();
+    if (!canDoAction) {
+      throw new GraphQLForbiddenError();
+    }
+    return true;
   }
 }

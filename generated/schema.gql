@@ -2,8 +2,20 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type ShopeeSetting {
+  maxDeviceLogin: Int!
+  maxDistinctProductOnOrder: Int!
+
+  """Max product uploaded media size in MB"""
+  maxProductUploadedMediaSize: Int!
+
+  """Max uploaded display media quantity for 1 product"""
+  maxProductUploadedDisplayMediaQuantity: Int!
+  maxShippingAddress: Int!
+}
+
 type User {
-  id: ID!
+  _id: ID!
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
@@ -13,15 +25,16 @@ type User {
   fullName: String!
   username: String
   email: String
-  phoneNumber: String
+  phoneNumber: String!
   actualRole: ActualRole!
   status: UserStatus!
   profileImageId: ID
   coverImageId: ID
   followerIds: [ID!]
   followingIds: [ID!]
-  searchProductHistory: [String!]
+  textSearchingHistory: [String!]
   locale: Locale!
+  address: String
 }
 
 """
@@ -61,8 +74,92 @@ type AuthData {
   refreshToken: JWT!
 }
 
+type Category {
+  _id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  name: String!
+  slugs: String!
+}
+
+"""It's necessary for client's message highlight"""
+type NotificationHighlight {
+  locale: Locale!
+  offset: Int!
+  length: Int!
+}
+
+type NotificationMessage {
+  locale: Locale!
+  message: String!
+}
+
+type Notification {
+  _id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  type: NotificationType!
+  messages: [NotificationMessage!]!
+  highlights: [NotificationHighlight!]
+  specificReceiverId: ID
+  wasReadBySpecificReceiver: Boolean
+  receiverIds: ID
+  wasReadByReceiverIds: [ID!]
+  sendType: NotificationSendType!
+}
+
+enum NotificationType {
+  OrderCreated
+}
+
+enum NotificationSendType {
+  ForAll
+  ForSpecificReceiver
+  ForReceivers
+}
+
+type Media {
+  _id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  mimetype: Mimetype!
+  originalFileName: String!
+  size: Int!
+  description: String
+  cloudUrl: String!
+}
+
+enum Mimetype {
+  Png
+  Jpeg
+  Jpg
+  Webp
+  Mp4
+}
+
+type ProductType {
+  name: String!
+  thumbnailMedia: Media!
+  availableQuantity: Int!
+  originalPrice: Float!
+  salePrice: Float
+  saleTo: DateTime
+}
+
 type Product {
-  id: ID!
+  _id: ID!
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
@@ -71,39 +168,51 @@ type Product {
   deleteById: ID
   name: String!
   description: String!
-  tags: [String!]
+  tags: String
+  slugs: String!
   originalPrice: Float!
   salePrice: Float
+  saleTo: DateTime
   availableQuantity: Int!
   totalSold: Int!
-  categoryId: String
-  thumbnailMediaId: ID!
-  displayMediaIds: [ID!]
-  createdBy: User
+  categories: [Category!]
+  thumbnailMedia: Media!
+  displayMedias: [Media!]
+  types: [ProductType!]
+  maxSupportedShippingCost: Float
+  seller: User
+}
+
+type Address {
+  provinceId: String!
+  districtId: String!
+  wardId: String!
+  detail: String!
+  full: String!
 }
 
 type OrderDetail {
-  product: ID!
+  product: Product!
+  type: String
   quantity: Int!
-  size: String
-  color: String
 }
 
 type Order {
-  id: ID!
+  _id: ID!
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
   createById: ID
   updateById: ID
   deleteById: ID
-  details: OrderDetail!
+  details: [OrderDetail!]!
+  shippingAddress: Address!
+  totalCost: Float!
   status: OrderStatus!
 }
 
 enum OrderStatus {
   Pending
-  Splitted
   Cancelled
   Shipping
   Done
@@ -113,6 +222,11 @@ type Query {
   me: User!
   getAccessToken(refreshToken: String!): JWT!
   getMyProducts: [Product!]!
+  getProductDetail(id: String!): Product!
+  category(id: String!): Category
+  categories: [Category!]!
+  getMyOrders: [Order!]!
+  getShopeeSetting: ShopeeSetting!
 }
 
 type Mutation {
@@ -127,7 +241,10 @@ type Mutation {
   logoutAllDevice: Boolean!
   createProduct(input: CreateProductInput!): Product!
   updateProduct(input: UpdateProductInput!): Boolean!
+  createCategory(input: CreateCategoryInput!): Category!
+  updateCategory(input: UpdateCategoryInput!): Boolean!
   createOrder(input: CreateOrderInput!): Order!
+  updateShopeeSetting(input: UpdateShopeeSettingInput!): Boolean!
 }
 
 input CreateRegisterRequest {
@@ -144,7 +261,8 @@ input RegisterInput {
 }
 
 input LoginInput {
-  emailOrPhoneNumberOrUsername: String!
+  """It can be email, username or phone number"""
+  username: String!
   password: String!
 }
 
@@ -177,10 +295,23 @@ input CreateProductInput {
   description: String!
   tags: [String!]
   originalPrice: Float!
+  salePrice: Float
+  saleTo: DateTime
   availableQuantity: Int!
-  categoryId: ID
+  categoryIds: [ID!]
   thumbnailMediaId: ID!
   displayMediaIds: [String!]
+  types: [ProductTypeInput!]
+  maxSupportedShippingCost: Float
+}
+
+input ProductTypeInput {
+  name: String!
+  availableQuantity: Float!
+  thumbnailMediaId: ID!
+  originalPrice: Float
+  salePrice: Float
+  saleTo: DateTime
 }
 
 input UpdateProductInput {
@@ -188,20 +319,50 @@ input UpdateProductInput {
   description: String
   tags: [String!]
   originalPrice: Float
+  salePrice: Float
+  saleTo: DateTime
   availableQuantity: Int
-  categoryId: ID
-  thumbnailMediaId: ID
+  categoryIds: [ID!]
   displayMediaIds: [String!]
+  types: [ProductTypeInput!]
+  maxSupportedShippingCost: Float
+  id: ID!
+}
+
+input CreateCategoryInput {
+  name: String!
+}
+
+input UpdateCategoryInput {
+  name: String
   id: ID!
 }
 
 input CreateOrderInput {
-  orderDetails: [OrderDetailInput!]!
+  details: [OrderDetailInput!]!
+  shippingAddressInput: AddressInput!
 }
 
 input OrderDetailInput {
   productId: String!
+  type: String
   quantity: Int! = 1
-  size: String
-  color: String
+}
+
+input AddressInput {
+  provinceId: String!
+  districtId: String!
+  wardId: String!
+  detail: String!
+}
+
+input UpdateShopeeSettingInput {
+  maxDeviceLogin: Int
+  maxDistinctProductOnOrder: Int
+  maxProductUploadedMediaSize: Int
+  maxProductUploadedDisplayMediaQuantity: Int
+}
+
+type Subscription {
+  subOrderCreated: Notification!
 }
