@@ -10,7 +10,9 @@ export class CategoryQueryResolver {
 
   @Query(() => Category, { nullable: true })
   category(@Args('id') id: string) {
-    if (!isMongoId(id)) throw new CategoryNotFoundError();
+    if (!isMongoId(id)) {
+      throw new CategoryNotFoundError();
+    }
     return this.categoryService.findOneBasic({ id_equal: id });
   }
 

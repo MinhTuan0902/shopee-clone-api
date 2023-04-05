@@ -34,7 +34,7 @@ type User {
   followingIds: [ID!]
   textSearchingHistory: [String!]
   locale: Locale!
-  shippingAddresses: [String!]
+  address: String
 }
 
 """
@@ -86,6 +86,46 @@ type Category {
   slugs: String!
 }
 
+"""It's necessary for client's message highlight"""
+type NotificationHighlight {
+  locale: Locale!
+  offset: Int!
+  length: Int!
+}
+
+type NotificationMessage {
+  locale: Locale!
+  message: String!
+}
+
+type Notification {
+  _id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  type: NotificationType!
+  messages: [NotificationMessage!]!
+  highlights: [NotificationHighlight!]
+  specificReceiverId: ID
+  wasReadBySpecificReceiver: Boolean
+  receiverIds: ID
+  wasReadByReceiverIds: [ID!]
+  sendType: NotificationSendType!
+}
+
+enum NotificationType {
+  OrderCreated
+}
+
+enum NotificationSendType {
+  ForAll
+  ForSpecificReceiver
+  ForReceivers
+}
+
 type Media {
   _id: ID!
   createdAt: DateTime
@@ -115,6 +155,7 @@ type ProductType {
   availableQuantity: Int!
   originalPrice: Float!
   salePrice: Float
+  saleTo: DateTime
 }
 
 type Product {
@@ -127,30 +168,31 @@ type Product {
   deleteById: ID
   name: String!
   description: String!
-  tags: [String!]
+  tags: String
   slugs: String!
   originalPrice: Float!
   salePrice: Float
+  saleTo: DateTime
   availableQuantity: Int!
   totalSold: Int!
-  categoryId: String
+  categories: [Category!]
   thumbnailMedia: Media!
-  displayMediaIds: [ID!]
+  displayMedias: [Media!]
   types: [ProductType!]
+  maxSupportedShippingCost: Float
   seller: User
 }
 
-type ProductInOrder {
-  _id: ID!
-  createById: ID!
-  name: String!
-  thumbnailMedia: Media!
-  originalPrice: Int!
-  salePrice: Int
+type Address {
+  provinceId: String!
+  districtId: String!
+  wardId: String!
+  detail: String!
+  full: String!
 }
 
 type OrderDetail {
-  product: ProductInOrder!
+  product: Product!
   type: String
   quantity: Int!
 }
@@ -164,7 +206,8 @@ type Order {
   updateById: ID
   deleteById: ID
   details: [OrderDetail!]!
-  shippingAddress: String!
+  shippingAddress: Address!
+  totalCost: Float!
   status: OrderStatus!
 }
 
@@ -252,11 +295,14 @@ input CreateProductInput {
   description: String!
   tags: [String!]
   originalPrice: Float!
+  salePrice: Float
+  saleTo: DateTime
   availableQuantity: Int!
-  categoryId: ID
+  categoryIds: [ID!]
   thumbnailMediaId: ID!
   displayMediaIds: [String!]
   types: [ProductTypeInput!]
+  maxSupportedShippingCost: Float
 }
 
 input ProductTypeInput {
@@ -265,6 +311,7 @@ input ProductTypeInput {
   thumbnailMediaId: ID!
   originalPrice: Float
   salePrice: Float
+  saleTo: DateTime
 }
 
 input UpdateProductInput {
@@ -272,10 +319,13 @@ input UpdateProductInput {
   description: String
   tags: [String!]
   originalPrice: Float
+  salePrice: Float
+  saleTo: DateTime
   availableQuantity: Int
-  categoryId: ID
+  categoryIds: [ID!]
   displayMediaIds: [String!]
   types: [ProductTypeInput!]
+  maxSupportedShippingCost: Float
   id: ID!
 }
 
@@ -311,4 +361,8 @@ input UpdateShopeeSettingInput {
   maxDistinctProductOnOrder: Int
   maxProductUploadedMediaSize: Int
   maxProductUploadedDisplayMediaQuantity: Int
+}
+
+type Subscription {
+  subOrderCreated: Notification!
 }

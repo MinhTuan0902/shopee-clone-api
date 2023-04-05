@@ -5,10 +5,7 @@ export class WrongPasswordError extends GraphQLBadRequestError {
   constructor(locale: Locale = Locale.Vietnamese) {
     super({
       messageCode: 'WRONG_PASSWORD',
-      message: '',
-    });
-    this.message = this.i18nContext.translate('AUTH.WRONG_PASSWORD', {
-      lang: locale,
+      message: 'Password is wrong',
     });
     this.name = 'WrongPasswordError';
   }

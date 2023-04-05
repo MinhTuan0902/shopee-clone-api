@@ -28,8 +28,9 @@ export class ActualRolesGuard implements CanActivate {
     const canDoAction = requiredActualRoles.filter(
       (role) => user?.roles === role,
     );
-    if (canDoAction) return true;
-
-    throw new GraphQLForbiddenError();
+    if (!canDoAction) {
+      throw new GraphQLForbiddenError();
+    }
+    return true;
   }
 }

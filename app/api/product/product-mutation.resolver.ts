@@ -45,11 +45,10 @@ export class ProductMutationResolver {
       input,
       currentUser,
     );
-    await this.productService.updateOne({
+    return this.productService.updateOne({
       ...input,
       slugs: input?.name ? transformTextToSlugs(input?.name) : undefined,
     });
-    return true;
   }
 
   async deleteProducts() {}

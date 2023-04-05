@@ -28,8 +28,13 @@ export class ShopeeSettingMutationResolver {
     for (const prop in input) {
       if (!input[prop]) delete input[prop];
     }
-    await this.shopeeSettingModel.updateOne({}, { $set: { ...input } });
+    const { matchedCount, modifiedCount } =
+      await this.shopeeSettingModel.updateOne(
+        {},
+        { $set: { ...input } },
+        { upsert: true },
+      );
 
-    return true;
+    return matchedCount === 1 && modifiedCount === 1;
   }
 }

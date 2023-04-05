@@ -40,9 +40,13 @@ export class ProductService implements IService {
     );
   }
 
-  async updateOne(input: UpdateProductInput) {
+  async updateOne(input: UpdateProductInput): Promise<boolean> {
     const id = input.id;
     delete input.id;
-    await this.productModel.updateOne({ _id: id }, { $set: { ...input } });
+    const { matchedCount, modifiedCount } = await this.productModel.updateOne(
+      { _id: id },
+      { $set: { ...input } },
+    );
+    return matchedCount === 1 && modifiedCount === 1;
   }
 }

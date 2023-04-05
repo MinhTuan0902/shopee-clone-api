@@ -18,12 +18,8 @@ export class AddressValidator {
     @InjectModel(Geo.name) private readonly geoModel: Model<GeoDocument>,
   ) {}
 
-  async validateAddressInput({
-    provinceId,
-    districtId,
-    wardId,
-    detail,
-  }: AddressInput): Promise<string> {
+  async validateAddressInput(input: AddressInput): Promise<AddressInput> {
+    const { provinceId, districtId, wardId, detail } = input;
     const province = await this.geoModel.findOne({
       id: provinceId,
       type: GeoType.Province,
@@ -54,6 +50,9 @@ export class AddressValidator {
       throw new WardNotBelongToDistrictError(ward.name, district.name);
     }
 
-    return `${detail} - ${ward.name} - ${district.name} - ${province.name}`;
+    return {
+      ...input,
+      full: `${detail} - ${ward.name} - ${district.name} - ${province.name}`,
+    };
   }
 }

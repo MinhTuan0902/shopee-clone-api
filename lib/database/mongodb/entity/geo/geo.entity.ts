@@ -1,7 +1,7 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { GeoType } from './enum/geo-type.enum';
 import { Document } from 'mongoose';
+import { GeoType } from './enum/geo-type.enum';
 
 @Schema({ collection: 'Geo' })
 @ObjectType()
@@ -14,7 +14,7 @@ export class Geo {
   @Field(() => Int)
   level: number;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   @Field(() => String)
   id: string;
 

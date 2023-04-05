@@ -10,10 +10,11 @@ import {
   ProductTypeNotFoundError,
 } from '@api/product/error/product.error';
 import { ProductService } from '@api/product/product.service';
-import { Order, ProductInOrder } from '@mongodb/entity/order/order.entity';
+import { Order } from '@mongodb/entity/order/order.entity';
 import { ActualRole } from '@mongodb/entity/user/enum/actual-role.enum';
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
+import { CreateOrderService } from '@worker/order/create/create-order.service';
 import { CreateOrderInput } from './dto/create-order.input';
 import {
   InvalidProductTypeError,
@@ -28,6 +29,7 @@ export class OrderMutationResolver {
     private readonly orderService: OrderService,
     private readonly productService: ProductService,
     private readonly addressValidator: AddressValidator,
+    private readonly createOrderService: CreateOrderService,
   ) {}
 
   @UseGuards(JWTGuard, ActualRolesGuard)
@@ -35,17 +37,27 @@ export class OrderMutationResolver {
   @Mutation(() => Order)
   async createOrder(
     @Args('input') input: CreateOrderInput,
-    @CurrentUser() { userId, locale }: JWTData,
+    @CurrentUser() { userId }: JWTData,
   ): Promise<Order> {
     const { details, shippingAddressInput } = input;
     let sellerId: string;
+    let totalCost = 0;
+
+    /**
+     * A product often has many types, and each type can have a specific @originalPrice and @salePrice
+     * So we have to calculate the @totalCost in case if user's input has a specific product type
+     */
     for (let i = 0; i < details.length; i++) {
       const { productId, type, quantity } = details[i];
       const product = await this.productService.findOneBasic({
         id_equal: productId,
       });
-      if (!product) throw new ProductNotFoundError();
-      if (!sellerId) sellerId = product?.createById?.toString();
+      if (!product) {
+        throw new ProductNotFoundError();
+      }
+      if (!sellerId) {
+        sellerId = product?.createById?.toString();
+      }
       if (sellerId && sellerId !== product?.createById?.toString()) {
         throw new TooManyDistinctSellerError();
       }
@@ -59,8 +71,11 @@ export class OrderMutationResolver {
         throw new InvalidProductTypeError();
       }
 
+      let productPrice = 0;
       if (type) {
-        if (!product?.types?.length) throw new InvalidProductTypeError();
+        if (!product?.types?.length) {
+          throw new InvalidProductTypeError();
+        }
         let productType: string;
         for (let i = 0; i < product?.types?.length; i++) {
           const productTypeDB = product?.types[i];
@@ -72,31 +87,35 @@ export class OrderMutationResolver {
               throw new OrderedProductQuantityLargerThanAvailableError();
             }
             productType = type;
+            productPrice =
+              product?.types[i]?.salePrice * quantity ||
+              product?.types[i].originalPrice * quantity;
             break;
           }
         }
-        if (!productType) throw new ProductTypeNotFoundError();
+        if (!productType) {
+          throw new ProductTypeNotFoundError();
+        }
+      } else {
+        productPrice =
+          product?.salePrice * quantity || product.originalPrice * quantity;
       }
 
-      const productInOrder: ProductInOrder = {
-        _id: product._id,
-        name: product.name,
-        originalPrice: product.originalPrice,
-        salePrice: product?.salePrice,
-        createById: product.createById,
-        thumbnailMedia: product.thumbnailMedia,
-      };
-      input.details[i].product = productInOrder;
+      totalCost += productPrice;
+      input.details[i].product = product;
     }
 
     const shippingAddress = await this.addressValidator.validateAddressInput(
       shippingAddressInput,
     );
 
+    this.createOrderService.addCreateOrderPayloadToQueue({ sellerId });
+
     return this.orderService.createOne({
       ...input,
       createById: userId,
       shippingAddress,
+      totalCost,
     });
   }
 }

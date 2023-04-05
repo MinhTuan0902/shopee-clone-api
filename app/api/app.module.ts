@@ -4,10 +4,10 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { DataLoaderInterceptor } from 'nestjs-dataloader';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
+import { GeoModule } from './geo/geo.module';
 import { OrderModule } from './order/order.module';
 import { ProductModule } from './product/product.module';
 import { ShopeeSettingModule } from './setting/setting.module';
-import { GeoModule } from './geo/geo.module';
 
 @Module({
   imports: [

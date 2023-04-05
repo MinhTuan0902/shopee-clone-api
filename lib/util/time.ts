@@ -1,3 +1,5 @@
+import * as dayjs from 'dayjs';
+
 export type TimeUnit = 'second' | 'millisecond';
 
 /**
@@ -33,4 +35,16 @@ export function now(timeUnit: TimeUnit): number {
     default:
       return;
   }
+}
+
+export function getStartDayTime(date?: Date): Date {
+  return dayjs(date || undefined)
+    .startOf('day')
+    .toDate();
+}
+
+export function getEndDayTime(date?: Date): Date {
+  return dayjs(date || undefined)
+    .endOf('day')
+    .toDate();
 }

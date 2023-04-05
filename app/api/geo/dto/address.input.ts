@@ -13,4 +13,6 @@ export class AddressInput {
 
   @Field(() => String)
   detail: string;
+
+  full: string;
 }
