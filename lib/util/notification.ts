@@ -7,7 +7,7 @@ export function processNotificationMessage(
   locale: Locale,
   stringVariables?: string,
 ): string {
-  let message: string;
+  let content: string;
   switch (type) {
     case NotificationType.OrderCreated:
       const { totalOrder } = JSON.parse(
@@ -15,12 +15,12 @@ export function processNotificationMessage(
       ) as CreateOrderNotificationVariable;
       const haveManyOrder = totalOrder === 1 ? false : true;
       if (locale === Locale.EnglishUS) {
-        message = `You have ${totalOrder} new ${
+        content = `You have ${totalOrder} new ${
           haveManyOrder ? 'orders' : 'order'
         } that needs to be processed. Check now 📦`;
       }
       if (locale === Locale.Vietnamese) {
-        message = `Bạn có ${totalOrder} đơn hàng mới cần được xử lý. Kiểm tra ngay 📦`;
+        content = `Bạn có ${totalOrder} đơn hàng mới cần được xử lý. Kiểm tra ngay 📦`;
       }
       break;
 
@@ -28,5 +28,5 @@ export function processNotificationMessage(
       break;
   }
 
-  return message;
+  return content;
 }

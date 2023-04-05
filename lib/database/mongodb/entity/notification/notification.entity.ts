@@ -30,7 +30,7 @@ export class NotificationMessage {
 
   @Prop({ type: String })
   @Field(() => String)
-  message: string;
+  content: string;
 }
 
 @Schema({ timestamps: true, collection: 'Notification' })

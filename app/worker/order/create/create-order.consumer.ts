@@ -38,6 +38,9 @@ export class CreateOrderConsumer {
       let stringVariables: string;
       let createOrderNotificationVariable: CreateOrderNotificationVariable;
 
+      /**
+       * If database has @previousNotification and it's @wasReadBySpecificReceiver field is FALSE, it will be override and publish again
+       */
       let previousNotification = await this.notificationModel.findOne({
         type: notificationType,
         specificReceiverId: sellerId,
@@ -58,7 +61,7 @@ export class CreateOrderConsumer {
         notificationMessages = getAllEnumKey(Locale).map((key) => {
           return {
             locale: Locale[key],
-            message: processNotificationMessage(
+            content: processNotificationMessage(
               NotificationType.OrderCreated,
               Locale[key],
               JSON.stringify({ totalOrder: totalOrder + 1 }),
@@ -81,7 +84,7 @@ export class CreateOrderConsumer {
           { $new: true },
         );
         this.pubSub.publish(SubscriptionMessage.OrderCreated, {
-          previousNotification,
+          notification: previousNotification,
         });
         return;
       }
@@ -90,10 +93,12 @@ export class CreateOrderConsumer {
         totalOrder: 1,
       };
       stringVariables = JSON.stringify(createOrderNotificationVariable);
+
+      // TODO: create function to get notification's message based on NotificationType param
       notificationMessages = getAllEnumKey(Locale).map((key) => {
         return {
           locale: Locale[key],
-          message: processNotificationMessage(
+          content: processNotificationMessage(
             NotificationType.OrderCreated,
             Locale[key],
             JSON.stringify({ totalOrder: 1 }),
