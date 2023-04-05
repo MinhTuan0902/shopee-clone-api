@@ -29,8 +29,9 @@ export class RolesGuard implements CanActivate {
     const canDoAction = requiredRoles.some((role) =>
       user?.roles?.includes(role),
     );
-    if (canDoAction) return true;
-
-    throw new GraphQLForbiddenError();
+    if (!canDoAction) {
+      throw new GraphQLForbiddenError();
+    }
+    return true;
   }
 }

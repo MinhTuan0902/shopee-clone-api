@@ -1,7 +1,8 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongoSchema } from 'mongoose';
 import { BaseEntity } from '../base.entity';
+import { Category } from '../category/category.entity';
 import { Media } from '../media/media.entity';
 
 @ObjectType()
@@ -25,6 +26,10 @@ export class ProductType {
   @Prop({ type: Number })
   @Field(() => Number, { nullable: true })
   salePrice?: number;
+
+  @Prop({ type: Date })
+  @Field(() => Date, { nullable: true })
+  saleTo?: Date;
 }
 
 @Schema({ timestamps: true, collection: 'Product' })
@@ -38,9 +43,9 @@ export class Product extends BaseEntity {
   @Field(() => String)
   description: string;
 
-  @Prop({ type: Array<string> })
-  @Field(() => [String], { nullable: true })
-  tags?: string[];
+  @Prop({ type: String })
+  @Field(() => String, { nullable: true })
+  tags?: string;
 
   @Prop({ type: String })
   @Field(() => String)
@@ -54,6 +59,10 @@ export class Product extends BaseEntity {
   @Field(() => Number, { nullable: true })
   salePrice?: number;
 
+  @Prop({ type: Date })
+  @Field(() => Date, { nullable: true })
+  saleTo?: Date;
+
   @Prop({ type: Number })
   @Field(() => Int)
   availableQuantity: number;
@@ -62,17 +71,17 @@ export class Product extends BaseEntity {
   @Field(() => Int)
   totalSold: number;
 
-  @Prop({ type: MongoSchema.Types.ObjectId })
-  @Field(() => String, { nullable: true })
-  categoryId?: string;
+  @Prop({ type: Array<MongoSchema.Types.Mixed> })
+  @Field(() => [Category], { nullable: true })
+  categories?: Category[];
 
   @Prop({ type: MongoSchema.Types.Mixed })
   @Field(() => Media)
   thumbnailMedia: Media;
 
-  @Prop({ type: Array<MongoSchema.Types.ObjectId> })
-  @Field(() => [ID], { nullable: true })
-  displayMediaIds?: string[];
+  @Prop({ type: Array<MongoSchema.Types.Mixed> })
+  @Field(() => [Media], { nullable: true })
+  displayMedias?: string[];
 
   @Prop({
     type: [
@@ -82,12 +91,17 @@ export class Product extends BaseEntity {
         availableQuantity: { type: Number },
         originalPrice: { type: Number },
         salePrice: { type: Number },
+        saleTo: { type: Date },
       },
     ],
     _id: false,
   })
   @Field(() => [ProductType], { nullable: true })
   types?: ProductType[];
+
+  @Prop({ type: Number })
+  @Field(() => Number, { nullable: true })
+  maxSupportedShippingCost?: number;
 }
 
 export type ProductDocument = Product & Document;

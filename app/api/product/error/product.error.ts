@@ -24,7 +24,7 @@ export class ProductSoldOutError extends GraphQLBadRequestError {
   constructor(name: string) {
     super({
       messageCode: 'PRODUCT_SOLD_OUT',
-      message: 'Product is sold out',
+      message: `Product ${name} is sold out`,
     });
     this.name = 'ProductSoldOutError';
   }

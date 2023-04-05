@@ -1,41 +1,16 @@
-import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongoSchema } from 'mongoose';
 import { BaseEntity } from '../base.entity';
-import { Media } from '../media/media.entity';
 import { OrderStatus } from './enum/order-status.enum';
-
-@ObjectType()
-export class ProductInOrder {
-  @Field(() => ID)
-  _id: string;
-
-  @Prop({ type: MongoSchema.Types.ObjectId })
-  @Field(() => ID)
-  createById: string;
-
-  @Prop({ type: String })
-  @Field(() => String)
-  name: string;
-
-  @Prop({ type: MongoSchema.Types.Mixed })
-  @Field(() => Media)
-  thumbnailMedia: Media;
-
-  @Prop({ type: Number })
-  @Field(() => Int)
-  originalPrice: number;
-
-  @Prop({ type: Number })
-  @Field(() => Int, { nullable: true })
-  salePrice?: number;
-}
+import { Product } from '../product/product.entity';
+import { Address } from '../address/address.entity';
 
 @ObjectType()
 export class OrderDetail {
   @Prop({ type: MongoSchema.Types.Mixed })
-  @Field(() => ProductInOrder)
-  product: ProductInOrder;
+  @Field(() => Product)
+  product: Product;
 
   @Prop({ type: String })
   @Field(() => String, { nullable: true })
@@ -52,14 +27,7 @@ export class Order extends BaseEntity {
   @Prop({
     type: [
       {
-        product: {
-          _id: { type: MongoSchema.Types.ObjectId },
-          createById: { type: MongoSchema.Types.ObjectId },
-          name: { type: String },
-          thumbnailMedia: { type: MongoSchema.Types.Mixed },
-          originalPrice: { type: Number },
-          salePrice: { type: Number },
-        },
+        product: { type: MongoSchema.Types.Mixed },
         type: { type: String },
         quantity: { type: Number },
       },
@@ -69,9 +37,13 @@ export class Order extends BaseEntity {
   @Field(() => [OrderDetail])
   details: OrderDetail[];
 
-  @Prop({ type: String })
-  @Field(() => String)
-  shippingAddress: string;
+  @Prop({ type: MongoSchema.Types.Mixed })
+  @Field(() => Address)
+  shippingAddress: Address;
+
+  @Prop({ type: Number })
+  @Field(() => Number)
+  totalCost: number;
 
   @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Pending })
   @Field(() => OrderStatus)

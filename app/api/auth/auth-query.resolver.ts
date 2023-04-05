@@ -39,7 +39,9 @@ export class AuthQueryResolver {
     const refreshTokenRecord = await this.refreshTokenModel.findOne({
       token: refreshToken,
     });
-    if (!refreshTokenRecord) throw new InvalidAuthTokenError();
+    if (!refreshTokenRecord) {
+      throw new InvalidAuthTokenError();
+    }
     if (
       refreshTokenRecord?.revokedAt ||
       refreshTokenRecord.expiresAt <= new Date()
@@ -52,7 +54,9 @@ export class AuthQueryResolver {
       deletedAt: null,
       status: UserStatus.Active,
     });
-    if (!user) throw new InvalidAuthTokenError();
+    if (!user) {
+      throw new InvalidAuthTokenError();
+    }
 
     const jwtPayload = await this.authService.extractJWTDataFromUser(
       user,

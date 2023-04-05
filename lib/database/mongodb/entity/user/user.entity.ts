@@ -56,7 +56,7 @@ export class User extends BaseEntity {
   @Field(() => [ID], { nullable: true })
   followingIds?: string[];
 
-  @Prop({ type: Array<String> })
+  @Prop({ type: Array<string> })
   @Field(() => [String], { nullable: true })
   textSearchingHistory?: string[];
 
@@ -66,7 +66,7 @@ export class User extends BaseEntity {
 
   @Prop({ type: String })
   @Field(() => String, { nullable: true })
-  address?: String;
+  address?: string;
 }
 
 export type UserDocument = User & Document;

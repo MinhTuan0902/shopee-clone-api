@@ -43,9 +43,13 @@ export class CategoryMutationResolver {
     @Args('input') input: UpdateCategoryInput,
   ): Promise<boolean> {
     const { id, name } = input;
-    if (!isMongoId(id)) throw new CategoryNotFoundError();
+    if (!isMongoId(id)) {
+      throw new CategoryNotFoundError();
+    }
     const category = await this.categoryService.findOneBasic({ id_equal: id });
-    if (!category) throw new CategoryNotFoundError();
+    if (!category) {
+      throw new CategoryNotFoundError();
+    }
 
     if (
       name &&
@@ -55,11 +59,9 @@ export class CategoryMutationResolver {
       throw new CategoryAlreadyExistedError(name);
     }
 
-    await this.categoryService.updateOne({
+    return this.categoryService.updateOne({
       ...input,
       slugs: name ? transformTextToSlugs(name) : undefined,
     });
-
-    return true;
   }
 }

@@ -14,7 +14,7 @@ export class SendSMSConsumer {
   ) {}
 
   @Process()
-  async handleSendSMS(job: Job<SendSMSPayload>) {
+  handleSendSMS(job: Job<SendSMSPayload>) {
     const { toPhoneNumber, body } = job.data;
     this.sendSMS(toPhoneNumber, body);
   }

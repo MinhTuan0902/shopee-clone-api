@@ -1,5 +1,5 @@
 {
-  "name": "facebook-clone-api",
+  "name": "shopee-clone-api",
   "version": "0.0.1",
   "description": "",
   "author": "",
@@ -46,6 +46,7 @@
     "dataloader": "^2.2.2",
     "dayjs": "^1.11.7",
     "graphql": "^16.6.0",
+    "graphql-redis-subscriptions": "^2.6.0",
     "graphql-upload": "14",
     "ioredis": "^5.3.1",
     "libphonenumber-js": "^1.10.24",

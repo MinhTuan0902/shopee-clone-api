@@ -1,5 +1,5 @@
 import { UserAgent } from '@common/decorator/context.decorator';
-import { GraphQLBadRequestError } from '@common/error/graphql.error';
+import { GraphQLUnexpectedError } from '@common/error/graphql.error';
 import { CustomRedisService } from '@common/module/custom-redis/custom-redis.service';
 import { ENVVariable } from '@common/module/env/env.constant';
 import { ENVService } from '@common/module/env/env.service';
@@ -83,7 +83,7 @@ export class AuthMutationResolver {
       value: otp,
       ttl: +otpTTL,
     });
-    this.sendSMSService.addSMSSenderPayloadToQueue({
+    this.sendSMSService.addSendSMSPayloadToQueue({
       toPhoneNumber: phoneNumber,
       body: `Your OTP to register is ${otp}`,
     });
@@ -134,10 +134,7 @@ export class AuthMutationResolver {
         refreshToken,
       };
     } catch (error) {
-      throw new GraphQLBadRequestError({
-        messageCode: 'UNCAUGHT_ERROR',
-        message: error?.message,
-      });
+      throw new GraphQLUnexpectedError();
     } finally {
       session.endSession();
     }
@@ -242,7 +239,7 @@ export class AuthMutationResolver {
       value: otp,
       ttl: +otpTTL,
     });
-    this.sendSMSService.addSMSSenderPayloadToQueue({
+    this.sendSMSService.addSendSMSPayloadToQueue({
       toPhoneNumber: phoneNumber,
       body: `Your OTP to login is ${otp}`,
     });
@@ -344,7 +341,7 @@ export class AuthMutationResolver {
     const otp = generateNumberOTP();
     const otpTTL = this.envService.get(ENVVariable.OTPTimeToLive);
     this.customRedisService.set({ key, value: otp, ttl: +otpTTL });
-    this.sendSMSService.addSMSSenderPayloadToQueue({
+    this.sendSMSService.addSendSMSPayloadToQueue({
       toPhoneNumber: phoneNumber,
       body: `Your OTP to reset password is ${otp}`,
     });
@@ -397,7 +394,7 @@ export class AuthMutationResolver {
       throw new WrongPasswordError();
     }
 
-    await this.userModel.updateOne(
+    const { matchedCount, modifiedCount } = await this.userModel.updateOne(
       {
         _id: currentUser.userId,
       },
@@ -408,7 +405,7 @@ export class AuthMutationResolver {
       },
     );
 
-    return true;
+    return matchedCount === 1 && modifiedCount === 1;
   }
 
   @UseGuards(JWTGuard)

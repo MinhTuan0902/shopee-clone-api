@@ -40,9 +40,13 @@ export class CategoryService implements IService {
     );
   }
 
-  async updateOne(input: UpdateCategoryInput): Promise<void> {
+  async updateOne(input: UpdateCategoryInput): Promise<boolean> {
     const id = input.id;
     delete input.id;
-    await this.categoryModel.updateOne({ _id: id }, { $set: { ...input } });
+    const { matchedCount, modifiedCount } = await this.categoryModel.updateOne(
+      { _id: id },
+      { $set: { ...input } },
+    );
+    return matchedCount === 1 && modifiedCount === 1;
   }
 }

@@ -1,12 +1,12 @@
 import { AddressInput } from '@api/geo/dto/address.input';
-import { ProductInOrder } from '@mongodb/entity/order/order.entity';
+import { Product } from '@mongodb/entity/product/product.entity';
 import { Field, InputType, Int } from '@nestjs/graphql';
 
 @InputType()
 export class OrderDetailInput {
   @Field(() => String)
   productId: string;
-  product: ProductInOrder;
+  product: Product;
 
   @Field(() => String, { nullable: true })
   type?: string;
@@ -22,8 +22,9 @@ export class CreateOrderInput {
 
   @Field(() => AddressInput)
   shippingAddressInput: AddressInput;
+  shippingAddress: AddressInput;
 
-  shippingAddress: string;
+  totalCost: number;
 
   createById: string;
 }

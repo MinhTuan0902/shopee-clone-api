@@ -14,6 +14,7 @@ import {
   ThumbnailMediaNotFoundError,
 } from '../error/product.error';
 import { ProductService } from '../product.service';
+import * as dayjs from 'dayjs';
 
 @Injectable()
 export class ProductInputValidator {
@@ -29,11 +30,13 @@ export class ProductInputValidator {
   ): Promise<CreateProductInput> {
     const {
       name,
-      categoryId,
+      categoryIds,
       thumbnailMediaId,
       displayMediaIds,
       types,
       availableQuantity,
+      salePrice,
+      saleTo,
     } = input;
     if (
       await this.productService.findOneBasic({
@@ -49,10 +52,12 @@ export class ProductInputValidator {
       id_equal: thumbnailMediaId,
       createById_equal: userId,
     });
-    if (!thumbnailMedia) throw new ThumbnailMediaNotFoundError();
+    if (!thumbnailMedia) {
+      throw new ThumbnailMediaNotFoundError();
+    }
     input.thumbnailMedia = thumbnailMedia;
 
-    if (displayMediaIds) {
+    if (displayMediaIds && displayMediaIds.length) {
       const displayMedias = await this.mediaService.findManyBasic({
         id_in: displayMediaIds,
         createById_equal: userId,
@@ -60,21 +65,25 @@ export class ProductInputValidator {
       if (displayMedias.length !== displayMediaIds.length) {
         throw new DisplayMediasNotFoundError();
       }
+      input.displayMedias = displayMedias;
     }
 
-    if (
-      categoryId &&
-      !(await this.categoryService.findOneBasic({
-        id_equal: categoryId,
-      }))
-    ) {
-      throw new CategoryNotFoundError();
+    if (categoryIds && categoryIds.length) {
+      const categories = await this.categoryService.findManyBasic({
+        id_in: categoryIds,
+      });
+      if (categoryIds.length !== categories.length) {
+        throw new CategoryNotFoundError();
+      }
+      input.categories = categories;
     }
 
     if (types && types.length) {
       let totalQuantity = 0;
       for (let i = 0; i < types.length; i++) {
-        if (!types[i].originalPrice) {
+        const { originalPrice, availableQuantity } = types[i];
+        // TODO: validate
+        if (!originalPrice) {
           types[i].originalPrice = input.originalPrice;
         }
         const thumbnailMedia = await this.mediaService.findOneBasic({
@@ -84,7 +93,7 @@ export class ProductInputValidator {
           throw new ThumbnailMediaNotFoundError();
         }
         input.types[i].thumbnailMedia = thumbnailMedia;
-        totalQuantity += types[i].availableQuantity;
+        totalQuantity += availableQuantity;
       }
       if (totalQuantity !== availableQuantity)
         throw new InvalidProductQuantityError();
@@ -94,6 +103,9 @@ export class ProductInputValidator {
       ...input,
       createById: userId,
       slugs: transformTextToSlugs(name),
+      salePrice: salePrice && saleTo ? salePrice : undefined,
+      saleTo:
+        salePrice && saleTo ? dayjs(saleTo).endOf('day').toDate() : undefined,
     };
   }
 
@@ -101,7 +113,7 @@ export class ProductInputValidator {
     input: UpdateProductInput,
     { userId }: JWTData,
   ): Promise<void> {
-    const { name, categoryId, types, availableQuantity } = input;
+    const { name, categoryIds, types, availableQuantity } = input;
     const productId = input.id;
     const product = await this.productService.findOneBasic({
       deletedAt_equal: null,
@@ -124,15 +136,14 @@ export class ProductInputValidator {
       throw new ProductAlreadyExistedError(name);
     }
 
-    if (
-      categoryId &&
-      product?.categoryId &&
-      categoryId !== product?.categoryId?.toString() &&
-      !(await this.categoryService.findOneBasic({
-        id_equal: categoryId,
-      }))
-    ) {
-      throw new CategoryNotFoundError();
+    if (categoryIds && categoryIds.length) {
+      const categories = await this.categoryService.findManyBasic({
+        id_in: categoryIds,
+      });
+      if (categoryIds.length !== categories.length) {
+        throw new CategoryNotFoundError();
+      }
+      input.categories = categories;
     }
 
     if (types && availableQuantity) {
