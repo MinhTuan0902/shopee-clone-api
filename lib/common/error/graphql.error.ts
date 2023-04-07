@@ -1,8 +1,6 @@
 import { Locale } from '@mongodb/entity/user/enum/locale.enum';
 import { HttpStatus } from '@nestjs/common';
-import { I18nTranslations } from 'generated/i18n';
 import { GraphQLError } from 'graphql';
-import { I18nContext } from 'nestjs-i18n';
 
 interface IErrorInput {
   messageCode: string;
@@ -10,8 +8,6 @@ interface IErrorInput {
 }
 
 export class GraphQLBadRequestError extends GraphQLError {
-  protected locale: Locale;
-  protected i18nContext: I18nContext<I18nTranslations>;
   constructor({ messageCode, message }: IErrorInput) {
     super(message, {
       extensions: {
@@ -23,9 +19,19 @@ export class GraphQLBadRequestError extends GraphQLError {
   }
 }
 
+export class GraphQLNotFoundError extends GraphQLError {
+  constructor({ messageCode, message }: IErrorInput) {
+    super(message, {
+      extensions: {
+        status: HttpStatus.NOT_FOUND,
+        code: 'NOT_FOUND',
+        messageCode,
+      },
+    });
+  }
+}
+
 export class GraphQLUnexpectedError extends GraphQLBadRequestError {
-  protected locale: Locale;
-  protected i18nContext: I18nContext<I18nTranslations>;
   constructor() {
     super({
       messageCode: 'UNEXPECTED_ERROR',

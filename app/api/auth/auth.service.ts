@@ -3,11 +3,11 @@ import { ENVService } from '@common/module/env/env.service';
 import { User } from '@mongodb/entity/user/user.entity';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { createUUIDv4 } from '@util/id';
 import { now } from '@util/time';
+import { JWTType } from './enum/jwt-type.enum';
 import { JWTData } from './type/jwt-data.type';
 import { JWT } from './type/jwt.type';
-import { generateUUIDv4 } from '@util/uuid';
-import { JWTType } from './enum/jwt-type.enum';
 
 @Injectable()
 export class AuthService {
@@ -49,7 +49,7 @@ export class AuthService {
     const refreshTokenExpirationTime = this.envService.get(
       ENVVariable.JWTRefreshTokenExpirationTime,
     );
-    const token = generateUUIDv4();
+    const token = createUUIDv4();
 
     return {
       token,

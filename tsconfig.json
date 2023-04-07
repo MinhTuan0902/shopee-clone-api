@@ -21,7 +21,7 @@
       "@api/*": ["app/api/*"],
       "@worker/*": ["app/worker/*"],
       "@entity/*": ["lib/entity/*"],
-      "@interface/*": ["lib/interface/*"],
+      "@interface/*": ["lib/common/interface/*"],
       "@common/*": ["lib/common/*"],
       "@util/*": ["lib/util/*"],
       "@mongodb/*": ["lib/database/mongodb/*"],

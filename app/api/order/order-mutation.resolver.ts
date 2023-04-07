@@ -109,13 +109,18 @@ export class OrderMutationResolver {
       shippingAddressInput,
     );
 
-    this.createOrderService.addCreateOrderPayloadToQueue({ sellerId });
-
-    return this.orderService.createOne({
+    const newOrder = await this.orderService.createOne({
       ...input,
       createById: userId,
-      shippingAddress,
-      totalCost,
+      shippingAddress: shippingAddress,
+      totalCost: totalCost,
     });
+
+    this.createOrderService.addCreateOrderPayloadToQueue({
+      sellerId: sellerId,
+      createdAt: newOrder?.createdAt,
+    });
+
+    return newOrder;
   }
 }

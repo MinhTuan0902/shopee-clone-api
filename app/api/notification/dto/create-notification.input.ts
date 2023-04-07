@@ -10,9 +10,16 @@ export class CreateNotificationInput {
   messages: NotificationMessage[];
   sendType: NotificationSendType;
 
+  /**
+   * Notifications can be override will have this field
+   */
   key?: string;
   highlights?: NotificationHighlight[];
-  specificReceiverId?: string;
-  receiverIds?: string[];
   stringVariables?: string;
+}
+
+export class CreateSpecificReceiverNotificationInput extends CreateNotificationInput {
+  specificReceiverId: string;
+  wasReadBySpecificReceiver: boolean;
+  key: string;
 }

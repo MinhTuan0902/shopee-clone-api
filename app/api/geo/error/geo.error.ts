@@ -1,6 +1,9 @@
-import { GraphQLBadRequestError } from '@common/error/graphql.error';
+import {
+  GraphQLBadRequestError,
+  GraphQLNotFoundError,
+} from '@common/error/graphql.error';
 
-export class ProvinceNotFoundError extends GraphQLBadRequestError {
+export class ProvinceNotFoundError extends GraphQLNotFoundError {
   constructor() {
     super({
       messageCode: 'PROVINCE_NOT_FOUND',
@@ -10,7 +13,7 @@ export class ProvinceNotFoundError extends GraphQLBadRequestError {
   }
 }
 
-export class DistrictNotFoundError extends GraphQLBadRequestError {
+export class DistrictNotFoundError extends GraphQLNotFoundError {
   constructor() {
     super({
       messageCode: 'DISTRICT_NOT_FOUND',
@@ -20,7 +23,7 @@ export class DistrictNotFoundError extends GraphQLBadRequestError {
   }
 }
 
-export class WardNotFoundError extends GraphQLBadRequestError {
+export class WardNotFoundError extends GraphQLNotFoundError {
   constructor() {
     super({
       messageCode: 'Ward_NOT_FOUND',

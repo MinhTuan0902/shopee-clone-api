@@ -1,4 +1,5 @@
 import { JWTGuard } from '@api/auth/guard/jwt.guard';
+import { JWTData } from '@api/auth/type/jwt-data.type';
 import { SubscriptionMessage } from '@common/module/pub-sub/enum/subscription-message.enum';
 import { Notification } from '@mongodb/entity/notification/notification.entity';
 import { UseGuards } from '@nestjs/common';
@@ -12,12 +13,15 @@ export class OrderSubscriptionResolver {
   @UseGuards(JWTGuard)
   @Subscription(() => Notification, {
     filter(payload, variables, context) {
-      return payload?.notification?.specificReceiverIds?.includes(
-        context?.req?.user?.userId,
+      return (
+        (
+          payload?.notification as Notification
+        )?.specificReceiverId?.toString() ===
+        (context?.req?.user as JWTData).userId
       );
     },
     resolve(payload, args, context, info) {
-      return payload?.notification;
+      return payload?.notification as Notification;
     },
   })
   subOrderCreated() {

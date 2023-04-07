@@ -1,6 +1,9 @@
-import { GraphQLBadRequestError } from '@common/error/graphql.error';
+import {
+  GraphQLBadRequestError,
+  GraphQLNotFoundError,
+} from '@common/error/graphql.error';
 
-export class ProductNotFoundError extends GraphQLBadRequestError {
+export class ProductNotFoundError extends GraphQLNotFoundError {
   constructor() {
     super({
       messageCode: 'PRODUCT_NOT_FOUND',
@@ -10,7 +13,7 @@ export class ProductNotFoundError extends GraphQLBadRequestError {
   }
 }
 
-export class ProductTypeNotFoundError extends GraphQLBadRequestError {
+export class ProductTypeNotFoundError extends GraphQLNotFoundError {
   constructor() {
     super({
       messageCode: 'PRODUCT_TYPE_NOT_FOUND',
@@ -40,7 +43,7 @@ export class ProductAlreadyExistedError extends GraphQLBadRequestError {
   }
 }
 
-export class ThumbnailMediaNotFoundError extends GraphQLBadRequestError {
+export class ThumbnailMediaNotFoundError extends GraphQLNotFoundError {
   constructor() {
     super({
       messageCode: 'THUMBNAIL_MEDIA_NOT_FOUND',
@@ -50,7 +53,7 @@ export class ThumbnailMediaNotFoundError extends GraphQLBadRequestError {
   }
 }
 
-export class DisplayMediasNotFoundError extends GraphQLBadRequestError {
+export class DisplayMediasNotFoundError extends GraphQLNotFoundError {
   constructor() {
     super({
       messageCode: 'DISPlAY_MEDIAS_NOT_FOUND',

@@ -1,6 +1,7 @@
 import { ENVVariable, NodeENV } from '@common/module/env/env.constant';
 import { ENVModule } from '@common/module/env/env.module';
 import { ENVService } from '@common/module/env/env.service';
+import { PubSubModule } from '@common/module/pub-sub/pub-sub.module';
 import {
   Notification,
   NotificationSchema,
@@ -13,7 +14,6 @@ import { OrderWorkerModule } from './order/order-worker.module';
 import { SendSMSConsumer } from './send-sms/send-sms.consumer';
 import { SendSMSModule } from './send-sms/send-sms.module';
 import { getBullQueuesConfig } from './worker-names';
-import { PubSubModule } from '@common/module/pub-sub/pub-sub.module';
 
 @Module({
   imports: [

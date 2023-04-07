@@ -2,8 +2,8 @@ import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongoSchema } from 'mongoose';
 import { BaseEntity } from '../base.entity';
-import { NotificationType } from './enum/notification-type.enum';
 import { Locale } from '../user/enum/locale.enum';
+import { NotificationType } from './enum/notification-type.enum';
 import { NotificationSendType } from './enum/send-type.enum';
 @ObjectType({
   description: "It's necessary for client's message highlight",
@@ -30,7 +30,7 @@ export class NotificationMessage {
 
   @Prop({ type: String })
   @Field(() => String)
-  message: string;
+  content: string;
 }
 
 @Schema({ timestamps: true, collection: 'Notification' })
@@ -41,16 +41,19 @@ export class Notification extends BaseEntity {
   type: NotificationType;
 
   /**
-   * @description This field is necessary for single receiver notification to override previous notification
+   * This field is necessary for single receiver notification to override previous notification
+   * @default NotificationType.OrderCreated: sellerId:createdAtStartDay:createdAtEndDay
+   * Only was not read notification in a day can be override
+   * `createdAtStartDay` and `createdAtEndDay` is in milliseconds
    */
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   key?: string;
 
   @Prop({
     type: [
       {
         locale: { type: String, enum: Locale },
-        message: { type: String },
+        content: { type: String },
       },
     ],
     _id: false,
@@ -96,6 +99,12 @@ export class Notification extends BaseEntity {
   @Prop({ type: String, enum: NotificationSendType })
   @Field(() => NotificationSendType)
   sendType: NotificationSendType;
+
+  /**
+   * Only FOR_ALL notification has this field
+   */
+  @Prop({ type: Date })
+  expiresAt?: Date;
 }
 
 export type NotificationDocument = Notification & Document;

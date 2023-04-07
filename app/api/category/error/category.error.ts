@@ -1,7 +1,10 @@
-import { GraphQLBadRequestError } from '@common/error/graphql.error';
+import {
+  GraphQLBadRequestError,
+  GraphQLNotFoundError,
+} from '@common/error/graphql.error';
 import { Locale } from '@mongodb/entity/user/enum/locale.enum';
 
-export class CategoryNotFoundError extends GraphQLBadRequestError {
+export class CategoryNotFoundError extends GraphQLNotFoundError {
   constructor() {
     super({
       messageCode: 'CATEGORY_NOT_FOUND',

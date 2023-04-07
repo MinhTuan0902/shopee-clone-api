@@ -95,7 +95,7 @@ type NotificationHighlight {
 
 type NotificationMessage {
   locale: Locale!
-  message: String!
+  content: String!
 }
 
 type Notification {
@@ -124,6 +124,17 @@ enum NotificationSendType {
   ForAll
   ForSpecificReceiver
   ForReceivers
+}
+
+type PageInfo {
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+}
+
+type PaginatedNotification {
+  totalItems: Int!
+  pageInfo: PageInfo!
+  items: [Notification!]!
 }
 
 type Media {
@@ -226,7 +237,28 @@ type Query {
   category(id: String!): Category
   categories: [Category!]!
   getMyOrders: [Order!]!
+  getMyNotifications(input: QueryNotificationInput!): PaginatedNotification!
   getShopeeSetting: ShopeeSetting!
+}
+
+input QueryNotificationInput {
+  filter: FilterNotificationInput!
+  option: QueryNotificationOption!
+}
+
+input FilterNotificationInput {
+  readNotificationType: ReadNotificationType! = All
+}
+
+enum ReadNotificationType {
+  WasRead
+  WasNotRead
+  All
+}
+
+input QueryNotificationOption {
+  limit: Int!
+  offset: Int! = 0
 }
 
 type Mutation {
@@ -244,6 +276,8 @@ type Mutation {
   createCategory(input: CreateCategoryInput!): Category!
   updateCategory(input: UpdateCategoryInput!): Boolean!
   createOrder(input: CreateOrderInput!): Order!
+  markWasReadNotification(id: String!): Boolean!
+  markWasReadAllNotification: Boolean!
   updateShopeeSetting(input: UpdateShopeeSettingInput!): Boolean!
 }
 

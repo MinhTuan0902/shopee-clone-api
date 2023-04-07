@@ -8,7 +8,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { logger: ['log'] });
   app.useGlobalPipes(new ValidationPipe());
-  app.use(graphqlUploadExpress({}));
+  app.use(graphqlUploadExpress());
 
   const envService = app.get(ENVService);
   const PORT = envService.get(ENVVariable.APIServerPort);

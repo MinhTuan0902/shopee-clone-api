@@ -1,9 +1,9 @@
-import { IService } from '@interface/service.interface';
+import { IService } from '@common/interface/service.interface';
 import { Media, MediaDocument } from '@mongodb/entity/media/media.entity';
 import { MongoFindOperatorProcessor } from '@mongodb/find-operator/find-operator-processor';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, PipelineStage } from 'mongoose';
+import { Model } from 'mongoose';
 import { FilterMediaInput } from './dto/filter-media.input';
 
 @Injectable()

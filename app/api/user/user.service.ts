@@ -1,5 +1,5 @@
 import { RegisterInput } from '@api/auth/dto/register.input';
-import { IService } from '@interface/service.interface';
+import { IService } from '@common/interface/service.interface';
 import { UserStatus } from '@mongodb/entity/user/enum/user-status.enum';
 import { User, UserDocument } from '@mongodb/entity/user/user.entity';
 import { InjectModel } from '@nestjs/mongoose';

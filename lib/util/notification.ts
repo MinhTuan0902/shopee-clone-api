@@ -1,7 +1,15 @@
-import { CreateOrderNotificationVariable } from '@interface/notification-variable.interface';
+import { CreateOrderNotificationVariable } from '@api/notification/interface/notification-variable.interface';
 import { NotificationType } from '@mongodb/entity/notification/enum/notification-type.enum';
 import { Locale } from '@mongodb/entity/user/enum/locale.enum';
 
+/**
+ *
+ * @param type The notification type to get suitable message
+ * @param locale The locale to get suitable message
+ * @param stringVariables It contains the variables, needed to be parsed by using `JSON.parse()`
+ * @returns A notification message
+ */
+// TODO: Config I18n to get suitable message
 export function processNotificationMessage(
   type: NotificationType,
   locale: Locale,

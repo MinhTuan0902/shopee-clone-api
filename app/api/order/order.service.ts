@@ -1,4 +1,4 @@
-import { IService } from '@interface/service.interface';
+import { IService } from '@common/interface/service.interface';
 import { Order, OrderDocument } from '@mongodb/entity/order/order.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';

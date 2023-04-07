@@ -1,4 +1,4 @@
-import { IService } from '@interface/service.interface';
+import { IService } from '@common/interface/service.interface';
 import {
   Product,
   ProductDocument,
