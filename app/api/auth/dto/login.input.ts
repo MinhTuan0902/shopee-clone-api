@@ -1,4 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
+import { IsPhoneNumber } from 'class-validator';
 
 @InputType()
 export class LoginInput {
@@ -13,12 +14,18 @@ export class LoginInput {
 
 @InputType()
 export class CreateLoginOTPInput {
+  @IsPhoneNumber('VN', {
+    message: 'phoneNumber must be a valid Vietnamese phone number',
+  })
   @Field(() => String)
   phoneNumber: string;
 }
 
 @InputType()
 export class LoginWithOTPInput {
+  @IsPhoneNumber('VN', {
+    message: 'phoneNumber must be a valid Vietnamese phone number',
+  })
   @Field(() => String)
   phoneNumber: string;
 

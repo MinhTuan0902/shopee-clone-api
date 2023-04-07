@@ -1,8 +1,7 @@
 import { GraphQLBadRequestError } from '@common/error/graphql.error';
-import { Locale } from '@mongodb/entity/user/enum/locale.enum';
 
 export class WrongPasswordError extends GraphQLBadRequestError {
-  constructor(locale: Locale = Locale.Vietnamese) {
+  constructor() {
     super({
       messageCode: 'WRONG_PASSWORD',
       message: 'Password is wrong',
@@ -12,7 +11,7 @@ export class WrongPasswordError extends GraphQLBadRequestError {
 }
 
 export class WrongUsernameError extends GraphQLBadRequestError {
-  constructor(locale: Locale = Locale.Vietnamese) {
+  constructor() {
     super({
       messageCode: 'WRONG_USERNAME',
       message: 'Username is wrong',
@@ -22,27 +21,27 @@ export class WrongUsernameError extends GraphQLBadRequestError {
 }
 
 export class RegisteredPhoneNumberError extends GraphQLBadRequestError {
-  constructor(locale: Locale = Locale.Vietnamese) {
+  constructor(phoneNumber: string) {
     super({
       messageCode: 'REGISTERED_PHONE_NUMBER',
-      message: 'Phone number has been registered',
+      message: `Phone number ${phoneNumber} has been registered`,
     });
     this.name = 'RegisteredPhoneNumberError';
   }
 }
 
 export class NotRegisteredPhoneNumberError extends GraphQLBadRequestError {
-  constructor(locale: Locale = Locale.Vietnamese) {
+  constructor(phoneNumber: string) {
     super({
       messageCode: 'NOT_REGISTERED_PHONE_NUMBER',
-      message: 'Phone number has not been registered',
+      message: `Phone number ${phoneNumber} has not been registered`,
     });
     this.name = 'NotRegisteredPhoneNumberError';
   }
 }
 
 export class DisableUserError extends GraphQLBadRequestError {
-  constructor(locale: Locale = Locale.Vietnamese) {
+  constructor() {
     super({
       messageCode: 'DISABLED_USER',
       message: 'User is disabled',
@@ -52,7 +51,7 @@ export class DisableUserError extends GraphQLBadRequestError {
 }
 
 export class MaxDeviceLoginExceedError extends GraphQLBadRequestError {
-  constructor(locale: Locale = Locale.Vietnamese) {
+  constructor() {
     super({
       messageCode: 'MAX_LOGGED_DEVICE',
       message: 'Account is logged at many devices',
@@ -62,7 +61,7 @@ export class MaxDeviceLoginExceedError extends GraphQLBadRequestError {
 }
 
 export class ExpiredTokenError extends GraphQLBadRequestError {
-  constructor(locale: Locale = Locale.Vietnamese) {
+  constructor() {
     super({
       messageCode: 'EXPIRED_TOKEN',
       message: 'Token is expired',
@@ -72,7 +71,7 @@ export class ExpiredTokenError extends GraphQLBadRequestError {
 }
 
 export class InvalidAuthTokenError extends GraphQLBadRequestError {
-  constructor(locale: Locale = Locale.Vietnamese) {
+  constructor() {
     super({
       messageCode: 'INVALID_AUTH_TOKEN',
       message: 'Auth token is invalid',

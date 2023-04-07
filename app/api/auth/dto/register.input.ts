@@ -1,18 +1,10 @@
 import { ActualRole } from '@mongodb/entity/user/enum/actual-role.enum';
 import { Locale } from '@mongodb/entity/user/enum/locale.enum';
 import { Field, InputType } from '@nestjs/graphql';
-import {
-  IsNotEmpty,
-  IsPhoneNumber,
-  IsString,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsPhoneNumber, MaxLength, MinLength } from 'class-validator';
 
 @InputType()
 export class CreateRegisterRequest {
-  @IsNotEmpty()
-  @IsString()
   @IsPhoneNumber('VN', {
     message: 'phoneNumber must be a valid Vietnamese phone number',
   })
@@ -22,16 +14,24 @@ export class CreateRegisterRequest {
 
 @InputType()
 export class RegisterInput {
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(6, { message: 'fullName must be at least 6 characters length' })
-  @MaxLength(50, { message: 'fullName must be at least 6 characters length' })
+  @MinLength(8, {
+    message: "fullName's length must be greater than or equal to 8",
+  })
+  @MaxLength(64, {
+    message: "fullName's length must be less than or equal to 64",
+  })
   @Field(() => String)
   fullName: string;
 
+  @IsPhoneNumber('VN', {
+    message: 'phoneNumber must be a valid Vietnamese phone number',
+  })
   @Field(() => String)
   phoneNumber: string;
 
+  @MinLength(8, {
+    message: "password's length must be greater than or equal to 8",
+  })
   @Field(() => String)
   password: string;
 

@@ -1,3 +1,4 @@
+import { QueryOption } from '@common/dto/base-query.input';
 import { IService } from '@common/interface/service.interface';
 import {
   Product,
@@ -20,11 +21,11 @@ export class ProductService implements IService {
     private readonly productModel: Model<ProductDocument>,
   ) {}
 
-  createOne(input: CreateProductInput): Promise<Product> {
+  async createOne(input: CreateProductInput): Promise<Product> {
     return this.productModel.create(input);
   }
 
-  findOneBasic(input: FilterProductInput): Promise<Product> {
+  async findOneBasic(input: FilterProductInput): Promise<Product> {
     return this.productModel.findOne(
       this.mongoFindOperatorProcessor.convertInputFilterToMongoFindOperator(
         input,
@@ -32,12 +33,20 @@ export class ProductService implements IService {
     );
   }
 
-  findManyBasic(input: FilterProductInput): Promise<Product[]> {
-    return this.productModel.find(
-      this.mongoFindOperatorProcessor.convertInputFilterToMongoFindOperator(
-        input,
-      ),
-    );
+  async findManyBasic(
+    input: FilterProductInput,
+    option?: QueryOption,
+  ): Promise<Product[]> {
+    const limit = option ? option.limit : undefined;
+    const offset = option ? option.offset : 0;
+    return this.productModel
+      .find(
+        this.mongoFindOperatorProcessor.convertInputFilterToMongoFindOperator(
+          input,
+        ),
+      )
+      .skip(offset)
+      .limit(limit);
   }
 
   async updateOne(input: UpdateProductInput): Promise<boolean> {

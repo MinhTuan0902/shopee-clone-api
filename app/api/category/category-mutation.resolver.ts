@@ -5,8 +5,6 @@ import { Category } from '@mongodb/entity/category/category.entity';
 import { Role } from '@mongodb/entity/user/enum/role.enum';
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { transformTextToSlugs } from '@util/string';
-import { isMongoId } from 'class-validator';
 import { CategoryService } from './category.service';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
@@ -30,10 +28,7 @@ export class CategoryMutationResolver {
       throw new CategoryAlreadyExistedError(name);
     }
 
-    return this.categoryService.createOne({
-      ...input,
-      slugs: transformTextToSlugs(name),
-    });
+    return this.categoryService.createOne(input);
   }
 
   @UseGuards(JWTGuard, RolesGuard)
@@ -43,9 +38,6 @@ export class CategoryMutationResolver {
     @Args('input') input: UpdateCategoryInput,
   ): Promise<boolean> {
     const { id, name } = input;
-    if (!isMongoId(id)) {
-      throw new CategoryNotFoundError();
-    }
     const category = await this.categoryService.findOneBasic({ id_equal: id });
     if (!category) {
       throw new CategoryNotFoundError();
@@ -59,9 +51,6 @@ export class CategoryMutationResolver {
       throw new CategoryAlreadyExistedError(name);
     }
 
-    return this.categoryService.updateOne({
-      ...input,
-      slugs: name ? transformTextToSlugs(name) : undefined,
-    });
+    return this.categoryService.updateOne(input);
   }
 }

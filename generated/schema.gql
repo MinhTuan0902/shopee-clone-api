@@ -2,78 +2,6 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type ShopeeSetting {
-  maxDeviceLogin: Int!
-  maxDistinctProductOnOrder: Int!
-
-  """Max product uploaded media size in MB"""
-  maxProductUploadedMediaSize: Int!
-
-  """Max uploaded display media quantity for 1 product"""
-  maxProductUploadedDisplayMediaQuantity: Int!
-  maxShippingAddress: Int!
-}
-
-type User {
-  _id: ID!
-  createdAt: DateTime
-  updatedAt: DateTime
-  deletedAt: DateTime
-  createById: ID
-  updateById: ID
-  deleteById: ID
-  fullName: String!
-  username: String
-  email: String
-  phoneNumber: String!
-  actualRole: ActualRole!
-  status: UserStatus!
-  profileImageId: ID
-  coverImageId: ID
-  followerIds: [ID!]
-  followingIds: [ID!]
-  textSearchingHistory: [String!]
-  locale: Locale!
-  address: String
-}
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
-
-enum ActualRole {
-  Customer
-  Seller
-  Transporter
-}
-
-enum UserStatus {
-  Active
-  Disabled
-}
-
-enum Locale {
-  Vietnamese
-  EnglishUS
-}
-
-type JWT {
-  token: String!
-  expiresAt: DateTime!
-  type: JWTType!
-}
-
-enum JWTType {
-  AccessToken
-  RefreshToken
-}
-
-type AuthData {
-  accessToken: JWT!
-  refreshToken: JWT!
-}
-
 type Category {
   _id: ID!
   createdAt: DateTime
@@ -86,56 +14,10 @@ type Category {
   slugs: String!
 }
 
-"""It's necessary for client's message highlight"""
-type NotificationHighlight {
-  locale: Locale!
-  offset: Int!
-  length: Int!
-}
-
-type NotificationMessage {
-  locale: Locale!
-  content: String!
-}
-
-type Notification {
-  _id: ID!
-  createdAt: DateTime
-  updatedAt: DateTime
-  deletedAt: DateTime
-  createById: ID
-  updateById: ID
-  deleteById: ID
-  type: NotificationType!
-  messages: [NotificationMessage!]!
-  highlights: [NotificationHighlight!]
-  specificReceiverId: ID
-  wasReadBySpecificReceiver: Boolean
-  receiverIds: ID
-  wasReadByReceiverIds: [ID!]
-  sendType: NotificationSendType!
-}
-
-enum NotificationType {
-  OrderCreated
-}
-
-enum NotificationSendType {
-  ForAll
-  ForSpecificReceiver
-  ForReceivers
-}
-
-type PageInfo {
-  hasPreviousPage: Boolean!
-  hasNextPage: Boolean!
-}
-
-type PaginatedNotification {
-  totalItems: Int!
-  pageInfo: PageInfo!
-  items: [Notification!]!
-}
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
 
 type Media {
   _id: ID!
@@ -194,12 +76,168 @@ type Product {
   seller: User
 }
 
+type User {
+  _id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  fullName: String!
+  username: String
+  email: String
+  phoneNumber: String!
+  actualRole: ActualRole!
+  status: UserStatus!
+  profileImage: Media
+  coverImage: Media
+  followerIds: [ID!]
+  followingIds: [ID!]
+  textSearchingHistory: [String!]
+  locale: Locale!
+  address: String
+  favoriteCategories: [Category!]
+  favoriteProducts(option: QueryOption!): PaginatedProduct!
+}
+
+enum ActualRole {
+  Customer
+  Seller
+  Transporter
+}
+
+enum UserStatus {
+  Active
+  Disabled
+}
+
+enum Locale {
+  Vietnamese
+  EnglishUS
+}
+
+input QueryOption {
+  limit: Int! = 20
+  offset: Int! = 0
+}
+
+type PageInfo {
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+}
+
+type PaginatedProduct {
+  totalItems: Int!
+  pageInfo: PageInfo!
+  items: [Product!]!
+}
+
+type ShopeeSetting {
+  maxDeviceLogin: Int!
+  maxDistinctProductOnOrder: Int!
+
+  """Max product uploaded media size in MB"""
+  maxProductUploadedMediaSize: Int!
+
+  """Max uploaded display media quantity for 1 product"""
+  maxProductUploadedDisplayMediaQuantity: Int!
+  maxShippingAddress: Int!
+}
+
+type JWT {
+  token: String!
+  expiresAt: DateTime!
+  type: JWTType!
+}
+
+enum JWTType {
+  AccessToken
+  RefreshToken
+}
+
+type AuthData {
+  accessToken: JWT!
+  refreshToken: JWT!
+}
+
+"""It's necessary for client's message highlight"""
+type NotificationHighlight {
+  locale: Locale!
+  offset: Int!
+  length: Int!
+}
+
+type NotificationMessage {
+  locale: Locale!
+  content: String!
+}
+
+type Notification {
+  _id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  type: NotificationType!
+  messages: [NotificationMessage!]!
+  highlights: [NotificationHighlight!]
+  specificReceiverId: ID
+  wasReadBySpecificReceiver: Boolean
+  receiverIds: ID
+  wasReadByReceiverIds: [ID!]
+  sendType: NotificationSendType!
+}
+
+enum NotificationType {
+  OrderCreated
+}
+
+enum NotificationSendType {
+  ForAll
+  ForSpecificReceiver
+  ForReceivers
+}
+
+type PaginatedNotification {
+  totalItems: Int!
+  pageInfo: PageInfo!
+  items: [Notification!]!
+}
+
 type Address {
   provinceId: String!
   districtId: String!
   wardId: String!
   detail: String!
   full: String!
+}
+
+type Transporter {
+  _id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createById: ID
+  updateById: ID
+  deleteById: ID
+  fullName: String!
+  username: String
+  email: String
+  phoneNumber: String!
+  actualRole: ActualRole!
+  status: UserStatus!
+  profileImage: Media
+  coverImage: Media
+  followerIds: [ID!]
+  followingIds: [ID!]
+  textSearchingHistory: [String!]
+  locale: Locale!
+  address: String
+  favoriteCategories: [Category!]
+  favoriteProducts(option: QueryOption!): PaginatedProduct!
 }
 
 type OrderDetail {
@@ -220,6 +258,7 @@ type Order {
   shippingAddress: Address!
   totalCost: Float!
   status: OrderStatus!
+  transporter: Transporter
 }
 
 enum OrderStatus {
@@ -232,10 +271,10 @@ enum OrderStatus {
 type Query {
   me: User!
   getAccessToken(refreshToken: String!): JWT!
-  getMyProducts: [Product!]!
-  getProductDetail(id: String!): Product!
   category(id: String!): Category
   categories: [Category!]!
+  getMyProducts: [Product!]!
+  getProductDetail(id: String!): Product!
   getMyOrders: [Order!]!
   getMyNotifications(input: QueryNotificationInput!): PaginatedNotification!
   getShopeeSetting: ShopeeSetting!
@@ -271,10 +310,12 @@ type Mutation {
   resetPassword(input: ResetPasswordInput!): Boolean!
   changePassword(input: ChangePasswordInput!): Boolean!
   logoutAllDevice: Boolean!
-  createProduct(input: CreateProductInput!): Product!
-  updateProduct(input: UpdateProductInput!): Boolean!
   createCategory(input: CreateCategoryInput!): Category!
   updateCategory(input: UpdateCategoryInput!): Boolean!
+  updateMyFavoriteCategories(input: UpdateFavoriteCategoriesInput!): Boolean!
+  updateMyFavoriteProducts(input: UpdateFavoriteProductsInput!): Boolean!
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(input: UpdateProductInput!): Boolean!
   createOrder(input: CreateOrderInput!): Order!
   markWasReadNotification(id: String!): Boolean!
   markWasReadAllNotification: Boolean!
@@ -324,6 +365,23 @@ input ChangePasswordInput {
   newPassword: String!
 }
 
+input CreateCategoryInput {
+  name: String!
+}
+
+input UpdateCategoryInput {
+  id: ID!
+  name: String!
+}
+
+input UpdateFavoriteCategoriesInput {
+  categoryIds: [ID!]!
+}
+
+input UpdateFavoriteProductsInput {
+  productIds: [ID!]!
+}
+
 input CreateProductInput {
   name: String!
   description: String!
@@ -360,15 +418,6 @@ input UpdateProductInput {
   displayMediaIds: [String!]
   types: [ProductTypeInput!]
   maxSupportedShippingCost: Float
-  id: ID!
-}
-
-input CreateCategoryInput {
-  name: String!
-}
-
-input UpdateCategoryInput {
-  name: String
   id: ID!
 }
 

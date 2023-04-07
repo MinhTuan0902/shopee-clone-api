@@ -20,7 +20,7 @@ export class CategoryService implements IService {
     private readonly categoryModel: Model<CategoryDocument>,
   ) {}
 
-  createOne(input: CreateCategoryInput): Promise<Category> {
+  async createOne(input: CreateCategoryInput): Promise<Category> {
     return this.categoryModel.create(input);
   }
 
@@ -33,11 +33,12 @@ export class CategoryService implements IService {
   }
 
   async findManyBasic(input: FilterCategoryInput): Promise<Category[]> {
-    return this.categoryModel.find(
-      this.mongoFindOperatorProcessor.convertInputFilterToMongoFindOperator(
-        input,
-      ),
-    );
+    // return this.categoryModel.find(
+    //   this.mongoFindOperatorProcessor.convertInputFilterToMongoFindOperator(
+    //     input,
+    //   ),
+    // );
+    return this.categoryModel.find({}).limit(undefined);
   }
 
   async updateOne(input: UpdateCategoryInput): Promise<boolean> {
@@ -45,8 +46,9 @@ export class CategoryService implements IService {
     delete input.id;
     const { matchedCount, modifiedCount } = await this.categoryModel.updateOne(
       { _id: id },
-      { $set: { ...input } },
+      { $set: input },
     );
+
     return matchedCount === 1 && modifiedCount === 1;
   }
 }

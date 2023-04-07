@@ -1,4 +1,3 @@
-import { Locale } from '@mongodb/entity/user/enum/locale.enum';
 import { HttpStatus } from '@nestjs/common';
 import { GraphQLError } from 'graphql';
 

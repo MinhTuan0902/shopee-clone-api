@@ -1,7 +1,7 @@
 import { BaseQueryInput, QueryOption } from '@common/dto/base-query.input';
 import { Field, InputType, Int } from '@nestjs/graphql';
 import { Type } from 'class-transformer';
-import { IsNumber, Max, Min, Validate, ValidateNested } from 'class-validator';
+import { IsNumber, Max, Min, ValidateNested } from 'class-validator';
 import { FilterNotificationInput } from './filter-notification.input';
 
 @InputType()

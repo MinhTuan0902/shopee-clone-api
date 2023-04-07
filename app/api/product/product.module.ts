@@ -3,7 +3,7 @@ import { CategoryModule } from '@api/category/category.module';
 import { MediaModule } from '@api/media/media.module';
 import { UserModule } from '@api/user/user.module';
 import { Product, ProductSchema } from '@mongodb/entity/product/product.entity';
-import { Module } from '@nestjs/common/decorators';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ProductFieldResolver } from './product-field.resolver';
 import { ProductMutationResolver } from './product-mutation.resolver';
@@ -13,10 +13,12 @@ import { ProductInputValidator } from './validator/product-input.validator';
 
 @Module({
   imports: [
-    AuthModule,
     CategoryModule,
     MediaModule,
-    UserModule,
+
+    forwardRef(() => AuthModule),
+    forwardRef(() => UserModule),
+
     MongooseModule.forFeature([
       {
         name: Product.name,

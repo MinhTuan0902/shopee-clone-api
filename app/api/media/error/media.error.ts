@@ -1,7 +1,4 @@
-import {
-  GraphQLBadRequestError,
-  GraphQLNotFoundError,
-} from '@common/error/graphql.error';
+import { GraphQLNotFoundError } from '@common/error/graphql.error';
 
 export class MediaNotFoundError extends GraphQLNotFoundError {
   constructor() {

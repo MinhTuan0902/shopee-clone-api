@@ -2,6 +2,9 @@ import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Schema as MongoSchema } from 'mongoose';
 import { BaseEntity } from '../base.entity';
+import { Category } from '../category/category.entity';
+import { Media } from '../media/media.entity';
+import { Product } from '../product/product.entity';
 import { ActualRole } from './enum/actual-role.enum';
 import { Locale } from './enum/locale.enum';
 import { Role } from './enum/role.enum';
@@ -40,13 +43,13 @@ export class User extends BaseEntity {
   @Field(() => UserStatus)
   status: UserStatus;
 
-  @Prop({ type: MongoSchema.Types.ObjectId })
-  @Field(() => ID, { nullable: true })
-  profileImageId?: string;
+  @Prop({ type: MongoSchema.Types.Mixed })
+  @Field(() => Media, { nullable: true })
+  profileImage?: string;
 
-  @Prop({ type: MongoSchema.Types.ObjectId })
-  @Field(() => ID, { nullable: true })
-  coverImageId?: string;
+  @Prop({ type: MongoSchema.Types.Mixed })
+  @Field(() => Media, { nullable: true })
+  coverImage?: string;
 
   @Prop({ type: Array<MongoSchema.Types.ObjectId> })
   @Field(() => [ID], { nullable: true })
@@ -67,6 +70,13 @@ export class User extends BaseEntity {
   @Prop({ type: String })
   @Field(() => String, { nullable: true })
   address?: string;
+
+  @Prop({ type: Array<MongoSchema.Types.Mixed> })
+  @Field(() => [Category], { nullable: true })
+  favoriteCategories?: Category[];
+
+  @Prop({ type: Array<MongoSchema.Types.Mixed> })
+  favoriteProducts?: Product[];
 }
 
 export type UserDocument = User & Document;

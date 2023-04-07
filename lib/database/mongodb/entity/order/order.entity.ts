@@ -1,10 +1,11 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongoSchema } from 'mongoose';
-import { BaseEntity } from '../base.entity';
-import { OrderStatus } from './enum/order-status.enum';
-import { Product } from '../product/product.entity';
 import { Address } from '../address/address.entity';
+import { BaseEntity } from '../base.entity';
+import { Product } from '../product/product.entity';
+import { Transporter } from '../transporter/transporter.entity';
+import { OrderStatus } from './enum/order-status.enum';
 
 @ObjectType()
 export class OrderDetail {
@@ -48,6 +49,10 @@ export class Order extends BaseEntity {
   @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Pending })
   @Field(() => OrderStatus)
   status: OrderStatus;
+
+  @Prop({ type: MongoSchema.Types.Mixed })
+  @Field(() => Transporter, { nullable: true })
+  transporter?: Transporter;
 }
 
 export type OrderDocument = Order & Document;

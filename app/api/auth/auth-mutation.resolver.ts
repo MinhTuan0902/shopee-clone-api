@@ -1,3 +1,4 @@
+import { UserService } from '@api/user/user.service';
 import { UserAgent } from '@common/decorator/context.decorator';
 import { GraphQLUnexpectedError } from '@common/error/graphql.error';
 import { CustomRedisService } from '@common/module/custom-redis/custom-redis.service';
@@ -43,6 +44,7 @@ import {
 } from './error/auth.error';
 import { OTPHasBeenSentBeforeError, WrongOTPError } from './error/otp.error';
 import { JWTGuard } from './guard/jwt.guard';
+import { isDisabledUser } from './helper/is-disable-user';
 import { AuthData } from './type/auth-data.type';
 import { JWTData } from './type/jwt-data.type';
 
@@ -50,25 +52,30 @@ import { JWTData } from './type/jwt-data.type';
 export class AuthMutationResolver {
   constructor(
     @InjectConnection() private readonly connection: Connection,
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @InjectModel(RefreshToken.name)
     private readonly refreshTokenModel: Model<RefreshTokenDocument>,
     @InjectModel(ShopeeSetting.name)
     private readonly shopeeSettingModel: Model<ShopeeSettingDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
 
     private readonly customRedisService: CustomRedisService,
     private readonly sendSMSService: SendSMSService,
     private readonly envService: ENVService,
     private readonly authService: AuthService,
+    private readonly userService: UserService,
   ) {}
 
-  // TODO: transform phone number to multiple country. Only support VN phone number now
   @Mutation(() => Boolean)
   async createRegisterRequest(
     @Args('input') { phoneNumber }: CreateRegisterRequest,
   ): Promise<boolean> {
-    if (await this.userModel.findOne({ deletedAt: null, phoneNumber })) {
-      throw new RegisteredPhoneNumberError();
+    if (
+      await this.userService.findOneBasic({
+        phoneNumber_equal: phoneNumber,
+        deletedAt_equal: null,
+      })
+    ) {
+      throw new RegisteredPhoneNumberError(phoneNumber);
     }
 
     const key = `otp:register:${phoneNumber}`;
@@ -79,7 +86,7 @@ export class AuthMutationResolver {
     const otp = generateNumberOTP();
     const otpTTL = this.envService.get(ENVVariable.OTPTimeToLive);
     this.customRedisService.set({
-      key,
+      key: key,
       value: otp,
       ttl: +otpTTL,
     });
@@ -108,7 +115,7 @@ export class AuthMutationResolver {
     session.startTransaction();
 
     try {
-      const newUser = await this.userModel.create({
+      const newUser = await this.userService.createOne({
         ...input,
         password: await encryptPassword(password),
       });
@@ -163,7 +170,7 @@ export class AuthMutationResolver {
       throw new WrongPasswordError();
     }
 
-    if (user.status === UserStatus.Disabled) {
+    if (isDisabledUser(user)) {
       throw new DisableUserError();
     }
 
@@ -222,12 +229,15 @@ export class AuthMutationResolver {
   async createLoginOTP(
     @Args('input') { phoneNumber }: CreateLoginOTPInput,
   ): Promise<boolean> {
-    const user = await this.userModel.findOne({ deletedAt: null, phoneNumber });
+    const user = await this.userService.findOneBasic({
+      phoneNumber_equal: phoneNumber,
+      deletedAt_equal: null,
+    });
     if (!user) {
-      throw new NotRegisteredPhoneNumberError();
+      throw new WrongUsernameError();
     }
 
-    if (user.status === UserStatus.Disabled) {
+    if (isDisabledUser(user)) {
       throw new DisableUserError();
     }
 
@@ -254,12 +264,15 @@ export class AuthMutationResolver {
     @Ip() ip: string,
   ): Promise<AuthData> {
     const { phoneNumber, otp } = input;
-    const user = await this.userModel.findOne({ deletedAt: null, phoneNumber });
+    const user = await this.userService.findOneBasic({
+      phoneNumber_equal: phoneNumber,
+      deletedAt_equal: null,
+    });
     if (!user) {
       throw new WrongUsernameError();
     }
 
-    if (user.status === UserStatus.Disabled) {
+    if (isDisabledUser(user)) {
       throw new DisableUserError();
     }
 
@@ -325,9 +338,12 @@ export class AuthMutationResolver {
   async createResetPasswordRequest(
     @Args('input') { phoneNumber }: CreateResetPasswordRequestInput,
   ): Promise<boolean> {
-    const user = await this.userModel.findOne({ deletedAt: null, phoneNumber });
+    const user = await this.userService.findOneBasic({
+      phoneNumber_equal: phoneNumber,
+      deletedAt_equal: null,
+    });
     if (!user) {
-      throw new NotRegisteredPhoneNumberError();
+      throw new NotRegisteredPhoneNumberError(phoneNumber);
     }
 
     if (user.status === UserStatus.Disabled) {
@@ -353,12 +369,15 @@ export class AuthMutationResolver {
   async resetPassword(
     @Args('input') { phoneNumber, otp, newPassword }: ResetPasswordInput,
   ): Promise<boolean> {
-    const user = await this.userModel.findOne({ deletedAt: null, phoneNumber });
+    const user = await this.userService.findOneBasic({
+      phoneNumber_equal: phoneNumber,
+      deletedAt_equal: null,
+    });
     if (!user) {
-      throw new NotRegisteredPhoneNumberError();
+      throw new NotRegisteredPhoneNumberError(phoneNumber);
     }
 
-    if (user.status === UserStatus.Disabled) {
+    if (isDisabledUser(user)) {
       throw new DisableUserError();
     }
 
@@ -369,43 +388,25 @@ export class AuthMutationResolver {
     }
     this.customRedisService.del(key);
 
-    await this.userModel.updateOne(
-      {
-        _id: user._id,
-      },
-      {
-        $set: {
-          password: await encryptPassword(newPassword),
-        },
-      },
-    );
-
-    return true;
+    const encryptedPassword = await encryptPassword(newPassword);
+    return this.userService.updatePassword(user._id, encryptedPassword);
   }
 
   @UseGuards(JWTGuard)
   @Mutation(() => Boolean)
   async changePassword(
     @Args('input') { currentPassword, newPassword }: ChangePasswordInput,
-    @CurrentUser() currentUser: JWTData,
+    @CurrentUser() { userId }: JWTData,
   ): Promise<boolean> {
-    const user = await this.userModel.findOne({ _id: currentUser.userId });
+    const user = await this.userService.findOneBasic({
+      id_equal: userId,
+    });
     if (!(await comparePassword(currentPassword, user.password))) {
       throw new WrongPasswordError();
     }
 
-    const { matchedCount, modifiedCount } = await this.userModel.updateOne(
-      {
-        _id: currentUser.userId,
-      },
-      {
-        $set: {
-          password: await encryptPassword(newPassword),
-        },
-      },
-    );
-
-    return matchedCount === 1 && modifiedCount === 1;
+    const encryptedPassword = await encryptPassword(newPassword);
+    return this.userService.updatePassword(userId, encryptedPassword);
   }
 
   @UseGuards(JWTGuard)
@@ -430,7 +431,5 @@ export class AuthMutationResolver {
     );
 
     return true;
-
-    // TODO: QR login
   }
 }
