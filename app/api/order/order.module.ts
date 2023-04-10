@@ -46,5 +46,6 @@ import { OrderWorkerModule } from '@worker/order/order-worker.module';
     OrderQueryResolver,
     OrderSubscriptionResolver,
   ],
+  exports: [OrderService],
 })
 export class OrderModule {}

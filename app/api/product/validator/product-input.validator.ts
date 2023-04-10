@@ -4,6 +4,7 @@ import { CategoryNotFoundError } from '@api/category/error/category.error';
 import { MediaService } from '@api/media/media.service';
 import { Injectable } from '@nestjs/common';
 import { transformTextToSlugs } from '@util/string';
+import * as dayjs from 'dayjs';
 import { CreateProductInput } from '../dto/create-product.input';
 import { UpdateProductInput } from '../dto/update-product.input';
 import {
@@ -14,7 +15,6 @@ import {
   ThumbnailMediaNotFoundError,
 } from '../error/product.error';
 import { ProductService } from '../product.service';
-import * as dayjs from 'dayjs';
 
 @Injectable()
 export class ProductInputValidator {
@@ -41,7 +41,7 @@ export class ProductInputValidator {
     if (
       await this.productService.findOneBasic({
         deletedAt_equal: null,
-        createById_equal: userId,
+        createByUserId_equal: userId,
         name_equal: name,
       })
     ) {
@@ -50,7 +50,7 @@ export class ProductInputValidator {
 
     const thumbnailMedia = await this.mediaService.findOneBasic({
       id_equal: thumbnailMediaId,
-      createById_equal: userId,
+      createByUserId_equal: userId,
     });
     if (!thumbnailMedia) {
       throw new ThumbnailMediaNotFoundError();
@@ -60,7 +60,7 @@ export class ProductInputValidator {
     if (displayMediaIds && displayMediaIds.length) {
       const displayMedias = await this.mediaService.findManyBasic({
         id_in: displayMediaIds,
-        createById_equal: userId,
+        createByUserId_equal: userId,
       });
       if (displayMedias.length !== displayMediaIds.length) {
         throw new DisplayMediasNotFoundError();
@@ -101,7 +101,7 @@ export class ProductInputValidator {
 
     return {
       ...input,
-      createById: userId,
+      createByUserId: userId,
       slugs: transformTextToSlugs(name),
       salePrice: salePrice && saleTo ? salePrice : undefined,
       saleTo:
@@ -117,7 +117,7 @@ export class ProductInputValidator {
     const productId = input.id;
     const product = await this.productService.findOneBasic({
       deletedAt_equal: null,
-      createById_equal: userId,
+      createByUserId_equal: userId,
       id_equal: productId,
     });
     if (!product) {
@@ -129,7 +129,7 @@ export class ProductInputValidator {
       name !== product.name &&
       (await this.productService.findOneBasic({
         deletedAt_equal: null,
-        createById_equal: userId,
+        createByUserId_equal: userId,
         name_equal: name,
       }))
     ) {

@@ -51,14 +51,15 @@ export class OrderMutationResolver {
       const { productId, type, quantity } = details[i];
       const product = await this.productService.findOneBasic({
         id_equal: productId,
+        deletedAt_equal: null,
       });
       if (!product) {
         throw new ProductNotFoundError();
       }
       if (!sellerId) {
-        sellerId = product?.createById?.toString();
+        sellerId = product?.createByUserId?.toString();
       }
-      if (sellerId && sellerId !== product?.createById?.toString()) {
+      if (sellerId && sellerId !== product?.createByUserId?.toString()) {
         throw new TooManyDistinctSellerError();
       }
       if (product.availableQuantity === 0) {
@@ -111,7 +112,7 @@ export class OrderMutationResolver {
 
     const newOrder = await this.orderService.createOne({
       ...input,
-      createById: userId,
+      createByUserId: userId,
       shippingAddress: shippingAddress,
       totalCost: totalCost,
     });

@@ -7,9 +7,9 @@ type Category {
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
-  createById: ID
-  updateById: ID
-  deleteById: ID
+  createByUserId: ID
+  updateByUserId: ID
+  deleteByUserId: ID
   name: String!
   slugs: String!
 }
@@ -24,9 +24,9 @@ type Media {
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
-  createById: ID
-  updateById: ID
-  deleteById: ID
+  createByUserId: ID
+  updateByUserId: ID
+  deleteByUserId: ID
   mimetype: Mimetype!
   originalFileName: String!
   size: Int!
@@ -56,9 +56,9 @@ type Product {
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
-  createById: ID
-  updateById: ID
-  deleteById: ID
+  createByUserId: ID
+  updateByUserId: ID
+  deleteByUserId: ID
   name: String!
   description: String!
   tags: String
@@ -82,9 +82,9 @@ type User {
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
-  createById: ID
-  updateById: ID
-  deleteById: ID
+  createByUserId: ID
+  updateByUserId: ID
+  deleteByUserId: ID
   fullName: String!
   username: String
   email: String
@@ -115,6 +115,17 @@ enum UserStatus {
 enum Locale {
   Vietnamese
   EnglishUS
+}
+
+type PageInfo {
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+}
+
+type PaginatedProduct {
+  totalItems: Int!
+  pageInfo: PageInfo!
+  items: [Product!]!
 }
 
 type ShopeeSetting {
@@ -165,9 +176,9 @@ type Notification {
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
-  createById: ID
-  updateById: ID
-  deleteById: ID
+  createByUserId: ID
+  updateByUserId: ID
+  deleteByUserId: ID
   type: NotificationType!
   messages: [NotificationMessage!]!
   highlights: [NotificationHighlight!]
@@ -186,11 +197,6 @@ enum NotificationSendType {
   ForAll
   ForSpecificReceiver
   ForReceivers
-}
-
-type PageInfo {
-  hasPreviousPage: Boolean!
-  hasNextPage: Boolean!
 }
 
 type PaginatedNotification {
@@ -212,9 +218,9 @@ type Transporter {
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
-  createById: ID
-  updateById: ID
-  deleteById: ID
+  createByUserId: ID
+  updateByUserId: ID
+  deleteByUserId: ID
   fullName: String!
   username: String
   email: String
@@ -242,9 +248,9 @@ type Order {
   createdAt: DateTime
   updatedAt: DateTime
   deletedAt: DateTime
-  createById: ID
-  updateById: ID
-  deleteById: ID
+  createByUserId: ID
+  updateByUserId: ID
+  deleteByUserId: ID
   details: [OrderDetail!]!
   shippingAddress: Address!
   totalCost: Float!
@@ -259,21 +265,80 @@ enum OrderStatus {
   Done
 }
 
+type Feedback {
+  _id: ID!
+  createdAt: DateTime
+  updatedAt: DateTime
+  deletedAt: DateTime
+  createByUserId: ID
+  updateByUserId: ID
+  deleteByUserId: ID
+  productId: ID!
+  rateStar: Int!
+  content: String!
+  orderId: ID!
+  descriptionMedias: [Media!]
+}
+
 type Query {
   me: User!
   getAccessToken(refreshToken: String!): JWT!
-  category(id: String!): Category
+  category(id: String!): Category!
   categories: [Category!]!
-  getMyProducts: [Product!]!
+  getMyProducts(input: QueryProductInput!): PaginatedProduct!
   getProductDetail(id: String!): Product!
   getMyOrders: [Order!]!
   getMyNotifications(input: QueryNotificationInput!): PaginatedNotification!
   getShopeeSetting: ShopeeSetting!
 }
 
+input QueryProductInput {
+  option: QueryOption!
+  filter: FilterProductInput!
+}
+
+input QueryOption {
+  limit: Int! = 20
+  offset: Int! = 0
+}
+
+input FilterProductInput {
+  id_equal: ID
+  id_notEqual: ID
+  id_in: [ID!]
+  id_notIn: [ID!]
+  createByUserId_equal: ID
+  createByUserId_notEqual: ID
+  createByUserId_in: [ID!]
+  createByUserId_notIn: [ID!]
+  createdAt_equal: DateTime
+  createdAt_notEqual: DateTime
+  createdAt_greaterThan: DateTime
+  createdAt_greaterThanOrEqual: DateTime
+  createdAt_lessThan: DateTime
+  createdAt_lessThanOrEqual: DateTime
+  updatedAt_equal: DateTime
+  updatedAt_notEqual: DateTime
+  updatedAt_greaterThan: DateTime
+  updatedAt_greaterThanOrEqual: DateTime
+  updatedAt_lessThan: DateTime
+  updatedAt_lessThanOrEqual: DateTime
+  deletedAt_equal: DateTime
+  deletedAt_notEqual: DateTime
+  deletedAt_greaterThan: DateTime
+  deletedAt_greaterThanOrEqual: DateTime
+  deletedAt_lessThan: DateTime
+  deletedAt_lessThanOrEqual: DateTime
+}
+
 input QueryNotificationInput {
-  filter: FilterNotificationInput!
   option: QueryNotificationOption!
+  filter: FilterNotificationInput!
+}
+
+input QueryNotificationOption {
+  limit: Int!
+  offset: Int! = 0
 }
 
 input FilterNotificationInput {
@@ -284,11 +349,6 @@ enum ReadNotificationType {
   WasRead
   WasNotRead
   All
-}
-
-input QueryNotificationOption {
-  limit: Int!
-  offset: Int! = 0
 }
 
 type Mutation {
@@ -314,6 +374,7 @@ type Mutation {
   markWasReadNotification(id: String!): Boolean!
   markWasReadAllNotification: Boolean!
   updateShopeeSetting(input: UpdateShopeeSettingInput!): Boolean!
+  createFeedback(input: CreateFeedbackInput!): Feedback!
 }
 
 input CreateRegisterRequest {
@@ -434,6 +495,14 @@ input UpdateShopeeSettingInput {
   maxDistinctProductOnOrder: Int
   maxProductUploadedMediaSize: Int
   maxProductUploadedDisplayMediaQuantity: Int
+}
+
+input CreateFeedbackInput {
+  productId: ID!
+  orderId: ID!
+  rateStar: Int!
+  content: String!
+  descriptionMediaIds: [ID!]
 }
 
 type Subscription {

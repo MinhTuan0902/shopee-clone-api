@@ -13,6 +13,7 @@ import { DataLoaderInterceptor } from 'nestjs-dataloader';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { CategoryModule } from './category/category.module';
+import { FeedbackModule } from './feedback/feedback.module';
 import { GeoModule } from './geo/geo.module';
 import { OrderModule } from './order/order.module';
 import { ProductModule } from './product/product.module';
@@ -88,6 +89,7 @@ import { ShopeeSettingModule } from './setting/setting.module';
     CategoryModule,
     ShopeeSettingModule,
     GeoModule,
+    FeedbackModule,
   ],
   providers: [
     {

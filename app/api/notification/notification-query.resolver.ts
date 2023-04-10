@@ -77,7 +77,6 @@ export class NotificationQueryResolver {
         };
         break;
 
-      // Query both was read and was not read notification
       case ReadNotificationType.All:
         matchPipeline = {
           $or: [
@@ -105,7 +104,6 @@ export class NotificationQueryResolver {
         $match: matchPipeline,
       },
     ];
-    console.log(JSON.stringify(pipelines, null, 2));
     const notifications = (await this.notificationService.findManyByPipelines([
       ...pipelines,
       { $skip: offset },

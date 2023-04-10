@@ -11,8 +11,8 @@ export class ProductFieldResolver {
   async seller(
     @Parent() product: Product,
     @Loader(UserLoader)
-    userLoader: DataLoader<Product['createById'], User>,
+    userLoader: DataLoader<Product['createByUserId'], User>,
   ): Promise<User> {
-    return userLoader.load(product?.createById);
+    return userLoader.load(product?.createByUserId);
   }
 }

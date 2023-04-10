@@ -5,5 +5,5 @@ import { Field, ObjectType } from '@nestjs/graphql';
 @ObjectType()
 export class PaginatedProduct extends PaginatedItems {
   @Field(() => [Product])
-  items: [Product];
+  items: Product[];
 }

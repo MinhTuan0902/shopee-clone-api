@@ -21,13 +21,13 @@ export class BaseEntity {
 
   @Prop({ type: Schema.Types.ObjectId })
   @Field(() => ID, { nullable: true })
-  createById?: string;
+  createByUserId?: string;
 
   @Prop({ type: Schema.Types.ObjectId })
   @Field(() => ID, { nullable: true })
-  updateById?: string;
+  updateByUserId?: string;
 
   @Prop({ type: Schema.Types.ObjectId })
   @Field(() => ID, { nullable: true })
-  deleteById?: string;
+  deleteByUserId?: string;
 }

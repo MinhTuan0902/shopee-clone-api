@@ -1,4 +1,7 @@
-import { GraphQLBadRequestError } from '@common/error/graphql.error';
+import {
+  GraphQLBadRequestError,
+  GraphQLNotFoundError,
+} from '@common/error/graphql.error';
 
 export class ProductAvailableQuantityNotEnoughError extends GraphQLBadRequestError {
   constructor() {
@@ -47,5 +50,15 @@ export class OrderedProductQuantityLargerThanAvailableError extends GraphQLBadRe
       message: "Ordered product's quantity is larger than available quantity",
     });
     this.name = 'OrderedProductQuantityLargerThanAvailableError';
+  }
+}
+
+export class OrderNotFoundError extends GraphQLNotFoundError {
+  constructor() {
+    super({
+      messageCode: 'ORDER_NOT_FOUND',
+      message: 'Order is not found',
+    });
+    this.name = 'OrderNotFoundError';
   }
 }

@@ -59,6 +59,14 @@ export class ProductService implements IService {
     return matchedCount === 1 && modifiedCount === 1;
   }
 
+  async countBasic(input: FilterProductInput): Promise<number> {
+    return this.productModel.countDocuments(
+      this.mongoFindOperatorProcessor.convertInputFilterToMongoFindOperator(
+        input,
+      ),
+    );
+  }
+
   async likeProduct(userId: string, productId: string): Promise<boolean> {
     const { matchedCount, modifiedCount } = await this.productModel.updateOne(
       {

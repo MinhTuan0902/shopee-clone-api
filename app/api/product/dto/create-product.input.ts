@@ -113,5 +113,5 @@ export class CreateProductInput {
   maxSupportedShippingCost?: number;
 
   slugs: string;
-  createById: string;
+  createByUserId: string;
 }

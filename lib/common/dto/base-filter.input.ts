@@ -15,16 +15,16 @@ export class BaseFilterInput {
   id_notIn?: string[];
 
   @Field(() => ID, { nullable: true })
-  createById_equal?: string;
+  createByUserId_equal?: string;
 
   @Field(() => ID, { nullable: true })
-  createById_notEqual?: string;
+  createByUserId_notEqual?: string;
 
   @Field(() => [ID], { nullable: true })
-  createById_in?: string[];
+  createByUserId_in?: string[];
 
   @Field(() => [ID], { nullable: true })
-  createById_notIn?: string[];
+  createByUserId_notIn?: string[];
 
   @Field(() => Date, { nullable: true })
   createdAt_equal?: Date;

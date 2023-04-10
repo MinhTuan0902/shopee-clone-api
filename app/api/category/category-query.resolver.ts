@@ -1,6 +1,6 @@
+import { ParseMongoIdPipe } from '@common/pipe/parse-mongo-id.pipe';
 import { Category } from '@mongodb/entity/category/category.entity';
 import { Args, Query, Resolver } from '@nestjs/graphql';
-import { isMongoId } from 'class-validator';
 import { CategoryService } from './category.service';
 import { CategoryNotFoundError } from './error/category.error';
 
@@ -8,12 +8,14 @@ import { CategoryNotFoundError } from './error/category.error';
 export class CategoryQueryResolver {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Query(() => Category, { nullable: true })
-  category(@Args('id') id: string) {
-    if (!isMongoId(id)) {
+  @Query(() => Category)
+  async category(@Args('id', ParseMongoIdPipe) id: string) {
+    const category = await this.categoryService.findOneBasic({ id_equal: id });
+    if (!category) {
       throw new CategoryNotFoundError();
     }
-    return this.categoryService.findOneBasic({ id_equal: id });
+
+    return category;
   }
 
   @Query(() => [Category])

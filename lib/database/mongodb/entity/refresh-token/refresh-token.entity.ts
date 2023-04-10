@@ -9,7 +9,7 @@ export class RefreshToken extends BaseEntity {
   @Prop({ type: MongoSchema.Types.ObjectId, index: true })
   userId: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: true })
   token: string;
 
   @Prop({ type: Date })

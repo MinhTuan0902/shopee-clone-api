@@ -5,5 +5,5 @@ import { InputType } from '@nestjs/graphql';
 export class FilterProductInput extends BaseFilterInput {
   name_equal?: string;
   availableQuantity_equal?: number;
-  createById_equal?: string;
+  createByUserId_equal?: string;
 }

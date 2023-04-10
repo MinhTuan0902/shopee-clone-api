@@ -61,6 +61,7 @@ export class ProductMutationResolver {
   ) {
     const product = await this.productService.findOneBasic({
       id_equal: productId,
+      deletedAt_equal: null,
     });
     if (!product) {
       throw new ProductNotFoundError();

@@ -26,5 +26,5 @@ export class CreateOrderInput {
 
   totalCost: number;
 
-  createById: string;
+  createByUserId: string;
 }

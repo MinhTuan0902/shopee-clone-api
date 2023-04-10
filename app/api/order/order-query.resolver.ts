@@ -19,7 +19,7 @@ export class OrderQueryResolver {
   @ActualRoles(ActualRole.Customer)
   @Query(() => [Order])
   async getMyOrders(@CurrentUser() { userId }: JWTData) {
-    return this.orderService.findManyBasic({ createById_equal: userId });
+    return this.orderService.findManyBasic({ createByUserId_equal: userId });
   }
 
   async cmsGetOrderDetail() {}

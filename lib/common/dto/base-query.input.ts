@@ -9,9 +9,12 @@ export class QueryOption {
   offset: number;
 }
 
+@InputType()
 export class BaseQueryInput {
   filter: any;
+
   @Field(() => QueryOption)
   option: QueryOption;
+
   sortBy?: any;
 }
