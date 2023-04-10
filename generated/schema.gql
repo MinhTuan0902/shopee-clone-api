@@ -99,7 +99,6 @@ type User {
   locale: Locale!
   address: String
   favoriteCategories: [Category!]
-  favoriteProducts(option: QueryOption!): PaginatedProduct!
 }
 
 enum ActualRole {
@@ -116,22 +115,6 @@ enum UserStatus {
 enum Locale {
   Vietnamese
   EnglishUS
-}
-
-input QueryOption {
-  limit: Int! = 20
-  offset: Int! = 0
-}
-
-type PageInfo {
-  hasPreviousPage: Boolean!
-  hasNextPage: Boolean!
-}
-
-type PaginatedProduct {
-  totalItems: Int!
-  pageInfo: PageInfo!
-  items: [Product!]!
 }
 
 type ShopeeSetting {
@@ -205,6 +188,11 @@ enum NotificationSendType {
   ForReceivers
 }
 
+type PageInfo {
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+}
+
 type PaginatedNotification {
   totalItems: Int!
   pageInfo: PageInfo!
@@ -241,7 +229,6 @@ type Transporter {
   locale: Locale!
   address: String
   favoriteCategories: [Category!]
-  favoriteProducts(option: QueryOption!): PaginatedProduct!
 }
 
 type OrderDetail {
@@ -316,6 +303,9 @@ type Mutation {
   logoutAllDevice: Boolean!
   createCategory(input: CreateCategoryInput!): Category!
   updateCategory(input: UpdateCategoryInput!): Boolean!
+  updateMyFavoriteCategories(input: UpdateFavoriteCategoriesInput!): Boolean!
+  followUser(userId: String!): Boolean!
+  unFollowUser(userId: String!): Boolean!
   createProduct(input: CreateProductInput!): Product!
   updateProduct(input: UpdateProductInput!): Boolean!
   likeProduct(productId: String!): Boolean!
@@ -376,6 +366,10 @@ input CreateCategoryInput {
 input UpdateCategoryInput {
   id: ID!
   name: String!
+}
+
+input UpdateFavoriteCategoriesInput {
+  categoryIds: [ID!]!
 }
 
 input CreateProductInput {

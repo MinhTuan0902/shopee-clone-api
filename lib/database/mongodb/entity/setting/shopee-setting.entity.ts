@@ -26,6 +26,12 @@ export class ShopeeSetting {
   @Prop({ type: Number, default: 5 })
   @Field(() => Int)
   maxShippingAddress: number;
+
+  @Prop({ type: Number, default: 7 })
+  @Field(() => Int, {
+    description: 'Max time in day to process an PROCESSING order',
+  })
+  maxOrderCreatedPendingTime: number;
 }
 
 export type ShopeeSettingDocument = ShopeeSetting & Document;

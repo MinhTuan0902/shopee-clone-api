@@ -6,17 +6,4 @@ import { Args, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { createPaginatedObject } from '@util/paginated';
 
 @Resolver(() => User)
-export class UserFieldResolver {
-  @ResolveField(() => PaginatedProduct)
-  async favoriteProducts(
-    @Parent() user: User,
-    @Args('option') { limit, offset }: QueryOption,
-  ) {
-    return createPaginatedObject(
-      user?.favoriteProducts || [],
-      user?.favoriteProducts?.length || 0,
-      limit,
-      offset,
-    );
-  }
-}
+export class UserFieldResolver {}

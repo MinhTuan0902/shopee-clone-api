@@ -5,15 +5,13 @@ import { JWTGuard } from '@api/auth/guard/jwt.guard';
 import { JWTData } from '@api/auth/type/jwt-data.type';
 import { CategoryService } from '@api/category/category.service';
 import { CategoryNotFoundError } from '@api/category/error/category.error';
-import { ProductNotFoundError } from '@api/product/error/product.error';
 import { ProductService } from '@api/product/product.service';
+import { ParseMongoIdPipe } from '@common/pipe/parse-mongo-id.pipe';
 import { ActualRole } from '@mongodb/entity/user/enum/actual-role.enum';
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import {
-  UpdateFavoriteCategoriesInput,
-  UpdateFavoriteProductsInput,
-} from './dto/update-user.input';
+import { UpdateFavoriteCategoriesInput } from './dto/update-user.input';
+import { UserNotFoundError } from './error/user.error';
 import { UserService } from './user.service';
 
 @Resolver()
@@ -41,21 +39,33 @@ export class UserMutationResolver {
     return this.userService.updateFavoriteCategories(userId, categories);
   }
 
-  @UseGuards(JWTGuard, ActualRolesGuard)
-  @ActualRoles(ActualRole.Customer)
+  @UseGuards(JWTGuard)
   @Mutation(() => Boolean)
-  async updateMyFavoriteProducts(
-    @Args('input') { productIds }: UpdateFavoriteProductsInput,
-    @CurrentUser() { userId }: JWTData,
+  async followUser(
+    @Args('userId', ParseMongoIdPipe) userId: string,
+    @CurrentUser() currentUser: JWTData,
   ): Promise<boolean> {
-    const products = await this.productService.findManyBasic({
-      id_in: productIds,
-      deletedAt_equal: null,
-    });
-    if (products.length !== productIds.length) {
-      throw new ProductNotFoundError();
+    if (userId === currentUser.userId) {
+      return false;
     }
 
-    return this.userService.updateFavoriteProducts(userId, products);
+    const user = await this.userService.findOneBasic({
+      id_equal: userId,
+      deletedAt_equal: null,
+    });
+    if (!user) {
+      throw new UserNotFoundError();
+    }
+
+    return this.userService.followUser(currentUser.userId, userId);
+  }
+
+  @UseGuards(JWTGuard)
+  @Mutation(() => Boolean)
+  async unFollowUser(
+    @Args('userId', ParseMongoIdPipe) userId: string,
+    @CurrentUser() currentUser: JWTData,
+  ): Promise<boolean> {
+    return this.userService.unFollowUser(currentUser.userId, userId);
   }
 }

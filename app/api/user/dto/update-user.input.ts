@@ -10,13 +10,3 @@ export class UpdateFavoriteCategoriesInput {
   @Field(() => [ID])
   categoryIds: string[];
 }
-
-@InputType()
-export class UpdateFavoriteProductsInput {
-  @IsMongoId({
-    each: true,
-    message: 'Each productIds value must be a MongoId',
-  })
-  @Field(() => [ID])
-  productIds: string[];
-}

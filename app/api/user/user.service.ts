@@ -1,12 +1,11 @@
 import { RegisterInput } from '@api/auth/dto/register.input';
 import { IService } from '@common/interface/service.interface';
+import { Category } from '@mongodb/entity/category/category.entity';
 import { User, UserDocument } from '@mongodb/entity/user/user.entity';
 import { MongoFindOperatorProcessor } from '@mongodb/find-operator/find-operator-processor';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
 import { FilterUserInput } from './dto/filter-user.input';
-import { Category } from '@mongodb/entity/category/category.entity';
-import { Product } from '@mongodb/entity/product/product.entity';
 
 export class UserService implements IService {
   private mongoFindOperatorProcessor: MongoFindOperatorProcessor =
@@ -34,7 +33,7 @@ export class UserService implements IService {
     );
   }
 
-  async updatePassword(userId: string, password): Promise<boolean> {
+  async updatePassword(userId: string, password: string): Promise<boolean> {
     const { matchedCount, modifiedCount } = await this.userModel.updateOne(
       { _id: userId },
       { $set: { password: password } },
@@ -61,29 +60,6 @@ export class UserService implements IService {
     return matchedCount === 1 && modifiedCount === 1;
   }
 
-  async updateFavoriteProducts(
-    userId: string,
-    products: Product[],
-  ): Promise<boolean> {
-    const { matchedCount, modifiedCount } = await this.userModel.updateOne(
-      {
-        _id: userId,
-      },
-      {
-        $set: {
-          favoriteProducts: products,
-        },
-      },
-    );
-
-    return matchedCount === 1 && modifiedCount === 1;
-  }
-
-  /**
-   *
-   * @param followerId User ID who wants to follow `userId`
-   * @param userId User ID who
-   */
   async followUser(followerId: string, userId: string): Promise<boolean> {
     const updateOperators = [
       {
@@ -136,7 +112,7 @@ export class UserService implements IService {
             _id: userId,
           },
           update: {
-            $addToSet: {
+            $pull: {
               followerIds: followerId,
             },
           },
