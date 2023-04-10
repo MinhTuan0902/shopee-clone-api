@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongoSchema } from 'mongoose';
 import { BaseEntity } from '../base.entity';
@@ -43,7 +43,7 @@ export class Product extends BaseEntity {
   @Field(() => String)
   description: string;
 
-  @Prop({ type: String })
+  @Prop({ type: String, index: 'text' })
   @Field(() => String, { nullable: true })
   tags?: string;
 
@@ -102,6 +102,10 @@ export class Product extends BaseEntity {
   @Prop({ type: Number })
   @Field(() => Number, { nullable: true })
   maxSupportedShippingCost?: number;
+
+  @Prop({ type: [{ type: MongoSchema.Types.ObjectId }] })
+  @Field(() => [ID], { nullable: true })
+  likeByUserIds?: string[];
 }
 
 export type ProductDocument = Product & Document;

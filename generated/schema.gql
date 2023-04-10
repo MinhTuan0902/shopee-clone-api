@@ -73,6 +73,7 @@ type Product {
   displayMedias: [Media!]
   types: [ProductType!]
   maxSupportedShippingCost: Float
+  likeByUserIds: [ID!]
   seller: User
 }
 
@@ -143,6 +144,9 @@ type ShopeeSetting {
   """Max uploaded display media quantity for 1 product"""
   maxProductUploadedDisplayMediaQuantity: Int!
   maxShippingAddress: Int!
+
+  """Max time in day to process an PROCESSING order"""
+  maxOrderCreatedPendingTime: Int!
 }
 
 type JWT {
@@ -262,7 +266,7 @@ type Order {
 }
 
 enum OrderStatus {
-  Pending
+  Processing
   Cancelled
   Shipping
   Done
@@ -312,10 +316,10 @@ type Mutation {
   logoutAllDevice: Boolean!
   createCategory(input: CreateCategoryInput!): Category!
   updateCategory(input: UpdateCategoryInput!): Boolean!
-  updateMyFavoriteCategories(input: UpdateFavoriteCategoriesInput!): Boolean!
-  updateMyFavoriteProducts(input: UpdateFavoriteProductsInput!): Boolean!
   createProduct(input: CreateProductInput!): Product!
   updateProduct(input: UpdateProductInput!): Boolean!
+  likeProduct(productId: String!): Boolean!
+  unlikeProduct(productId: String!): Boolean!
   createOrder(input: CreateOrderInput!): Order!
   markWasReadNotification(id: String!): Boolean!
   markWasReadAllNotification: Boolean!
@@ -372,14 +376,6 @@ input CreateCategoryInput {
 input UpdateCategoryInput {
   id: ID!
   name: String!
-}
-
-input UpdateFavoriteCategoriesInput {
-  categoryIds: [ID!]!
-}
-
-input UpdateFavoriteProductsInput {
-  productIds: [ID!]!
 }
 
 input CreateProductInput {

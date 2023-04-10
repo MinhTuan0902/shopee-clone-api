@@ -58,4 +58,34 @@ export class ProductService implements IService {
     );
     return matchedCount === 1 && modifiedCount === 1;
   }
+
+  async likeProduct(userId: string, productId: string): Promise<boolean> {
+    const { matchedCount, modifiedCount } = await this.productModel.updateOne(
+      {
+        _id: productId,
+      },
+      {
+        $addToSet: {
+          likeByUserIds: userId,
+        },
+      },
+    );
+
+    return matchedCount === 1 && modifiedCount === 1;
+  }
+
+  async unlikeProduct(userId: string, productId: string): Promise<boolean> {
+    const { matchedCount, modifiedCount } = await this.productModel.updateOne(
+      {
+        _id: productId,
+      },
+      {
+        $pull: {
+          likeByUserIds: userId,
+        },
+      },
+    );
+
+    return matchedCount === 1 && modifiedCount === 1;
+  }
 }
