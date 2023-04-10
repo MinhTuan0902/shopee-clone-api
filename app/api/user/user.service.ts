@@ -5,6 +5,8 @@ import { MongoFindOperatorProcessor } from '@mongodb/find-operator/find-operator
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, Model } from 'mongoose';
 import { FilterUserInput } from './dto/filter-user.input';
+import { Category } from '@mongodb/entity/category/category.entity';
+import { Product } from '@mongodb/entity/product/product.entity';
 
 export class UserService implements IService {
   private mongoFindOperatorProcessor: MongoFindOperatorProcessor =
@@ -39,5 +41,110 @@ export class UserService implements IService {
     );
 
     return matchedCount === 1 && modifiedCount === 1;
+  }
+
+  async updateFavoriteCategories(
+    userId: string,
+    categories: Category[],
+  ): Promise<boolean> {
+    const { matchedCount, modifiedCount } = await this.userModel.updateOne(
+      {
+        _id: userId,
+      },
+      {
+        $set: {
+          favoriteCategories: categories,
+        },
+      },
+    );
+
+    return matchedCount === 1 && modifiedCount === 1;
+  }
+
+  async updateFavoriteProducts(
+    userId: string,
+    products: Product[],
+  ): Promise<boolean> {
+    const { matchedCount, modifiedCount } = await this.userModel.updateOne(
+      {
+        _id: userId,
+      },
+      {
+        $set: {
+          favoriteProducts: products,
+        },
+      },
+    );
+
+    return matchedCount === 1 && modifiedCount === 1;
+  }
+
+  /**
+   *
+   * @param followerId User ID who wants to follow `userId`
+   * @param userId User ID who
+   */
+  async followUser(followerId: string, userId: string): Promise<boolean> {
+    const updateOperators = [
+      {
+        updateOne: {
+          filter: {
+            _id: followerId,
+          },
+          update: {
+            $addToSet: {
+              followingIds: userId,
+            },
+          },
+        },
+      },
+      {
+        updateOne: {
+          filter: {
+            _id: userId,
+          },
+          update: {
+            $addToSet: {
+              followerIds: followerId,
+            },
+          },
+        },
+      },
+    ];
+    await this.userModel.bulkWrite(updateOperators);
+
+    return true;
+  }
+
+  async unFollowUser(followerId: string, userId: string): Promise<boolean> {
+    const updateOperators = [
+      {
+        updateOne: {
+          filter: {
+            _id: followerId,
+          },
+          update: {
+            $pull: {
+              followingIds: userId,
+            },
+          },
+        },
+      },
+      {
+        updateOne: {
+          filter: {
+            _id: userId,
+          },
+          update: {
+            $addToSet: {
+              followerIds: followerId,
+            },
+          },
+        },
+      },
+    ];
+    await this.userModel.bulkWrite(updateOperators);
+
+    return true;
   }
 }

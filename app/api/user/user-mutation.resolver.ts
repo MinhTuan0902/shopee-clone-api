@@ -8,23 +8,20 @@ import { CategoryNotFoundError } from '@api/category/error/category.error';
 import { ProductNotFoundError } from '@api/product/error/product.error';
 import { ProductService } from '@api/product/product.service';
 import { ActualRole } from '@mongodb/entity/user/enum/actual-role.enum';
-import { User, UserDocument } from '@mongodb/entity/user/user.entity';
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Resolver } from '@nestjs/graphql';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import {
   UpdateFavoriteCategoriesInput,
   UpdateFavoriteProductsInput,
 } from './dto/update-user.input';
+import { UserService } from './user.service';
 
 @Resolver()
 export class UserMutationResolver {
   constructor(
     private readonly categoryService: CategoryService,
     private readonly productService: ProductService,
-
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    private readonly userService: UserService,
   ) {}
 
   @UseGuards(JWTGuard, ActualRolesGuard)
@@ -41,16 +38,7 @@ export class UserMutationResolver {
       throw new CategoryNotFoundError();
     }
 
-    await this.userModel.updateOne(
-      { _id: userId },
-      {
-        $set: {
-          favoriteCategories: categories,
-        },
-      },
-    );
-
-    return true;
+    return this.userService.updateFavoriteCategories(userId, categories);
   }
 
   @UseGuards(JWTGuard, ActualRolesGuard)
@@ -68,15 +56,6 @@ export class UserMutationResolver {
       throw new ProductNotFoundError();
     }
 
-    await this.userModel.updateOne(
-      { _id: userId },
-      {
-        $set: {
-          favoriteProducts: products,
-        },
-      },
-    );
-
-    return true;
+    return this.userService.updateFavoriteProducts(userId, products);
   }
 }

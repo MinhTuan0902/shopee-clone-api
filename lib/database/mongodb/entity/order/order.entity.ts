@@ -46,7 +46,7 @@ export class Order extends BaseEntity {
   @Field(() => Number)
   totalCost: number;
 
-  @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Pending })
+  @Prop({ type: String, enum: OrderStatus, default: OrderStatus.Processing })
   @Field(() => OrderStatus)
   status: OrderStatus;
 
